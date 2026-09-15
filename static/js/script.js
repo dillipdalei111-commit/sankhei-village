@@ -82,20 +82,22 @@ document.addEventListener('DOMContentLoaded', () => {
     const navLinks = document.getElementById('nav-links');
     const navItems = document.querySelectorAll('.nav-links li a');
 
-    menuIcon.addEventListener('click', () => {
-        navLinks.classList.toggle('active');
-        menuIcon.classList.toggle('toggle');
-    });
+    if (menuIcon && navLinks) {
+        menuIcon.addEventListener('click', () => {
+            navLinks.classList.toggle('active');
+            menuIcon.classList.toggle('toggle');
+        });
+    }
 
     // Close mobile menu when a link is clicked
     navItems.forEach(item => {
         item.addEventListener('click', () => {
-            if (navLinks.classList.contains('active')) {
-                navLinks.classList.remove('active');
-                menuIcon.classList.remove('toggle');
-            }
-        });
+            if (navLinks && menuIcon && navLinks.classList.contains('active')) {
+            navLinks.classList.remove('active');
+            menuIcon.classList.remove('toggle');
+        }
     });
+});
 
     // Scroll Reveal Animation (Intersection Observer)
     const revealElements = document.querySelectorAll('.scroll-reveal');
