@@ -1,0 +1,268 @@
+{% extends 'base.html' %}
+{% block title %}{{ category.title }} Portal - Sankhei Village{% endblock %}
+
+{% block content %}
+<style>
+    .category-section-box {
+        background: var(--bg-light);
+        padding: 2.25rem;
+        border-radius: 20px;
+        margin-bottom: 2.5rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+        border: 1px solid rgba(0,0,0,0.06);
+    }
+    body.light-theme .category-section-box {
+        background: #ffffff;
+    }
+    .image-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+        gap: 1.25rem;
+        margin-bottom: 1.5rem;
+    }
+    .image-card {
+        position: relative;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 6px 15px rgba(0,0,0,0.08);
+        transition: transform 0.4s ease, box-shadow 0.4s ease;
+    }
+    .image-card:hover {
+        transform: translateY(-5px) scale(1.02);
+        box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+    }
+    .image-card img {
+        width: 100%;
+        height: 190px;
+        object-fit: cover;
+        display: block;
+        cursor: pointer;
+        transition: transform 0.5s ease;
+    }
+    .image-card:hover img {
+        transform: scale(1.08);
+    }
+    .delete-btn {
+        position: absolute;
+        top: 10px; right: 10px;
+        background: rgba(220, 53, 69, 0.9);
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 30px; height: 30px;
+        cursor: pointer;
+        display: flex; align-items: center; justify-content: center;
+        font-weight: bold;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        transition: transform 0.2s ease;
+    }
+    .delete-btn:hover {
+        background: #dc3545;
+        transform: scale(1.1);
+    }
+</style>
+
+<div class="container" style="padding-top: 40px;">
+
+    <!-- Breadcrumb Navigation -->
+    <div class="sub-page-breadcrumbs">
+        <a href="{{ url_for('index') }}">Home</a> &rsaquo; 
+        <a href="{{ url_for('portal') }}">Portal Hub</a> &rsaquo; 
+        <span>{{ category.title }}</span>
+    </div>
+
+    <!-- Quick Portal Navigation Bar -->
+    <div class="sub-page-nav-bar">
+        {% set icons = {'school': '🏫', 'medical': '🏥', 'sarapanch': '🏛️', 'president': '👑', 'culture': '🎭', 'temples': '🛕', 'agriculture': '🌾'} %}
+        {% for cat in all_categories %}
+        <a href="{{ url_for('portal_category_detail', category_id=cat.id) }}" class="sub-page-nav-pill {% if cat.id == category.id %}active{% endif %}">
+            <span>{{ icons.get(cat.id, '📌') }}</span> {{ cat.title }}
+        </a>
+        {% endfor %}
+    </div>
+
+    <!-- Category Sub-Page Hero Banner -->
+    <div class="sub-page-header">
+        <div class="sub-page-title-group">
+            <span class="sub-page-icon">{{ category_icon }}</span>
+            <div>
+                <h1>{{ category.title }} Portal</h1>
+                <div style="display: flex; gap: 0.75rem; align-items: center; margin-top: 0.5rem; flex-wrap: wrap;">
+                    <span class="portal-meta-badge" style="background: rgba(255,255,255,0.2); color: #fff; border-color: rgba(255,255,255,0.3);">📸 {{ images|length }} Photos</span>
+                    <span class="portal-meta-badge" style="background: rgba(255,255,255,0.2); color: #fff; border-color: rgba(255,255,255,0.3);">📢 {{ events|length }} Updates</span>
+                </div>
+            </div>
+            {% if category.profile_image %}
+            <img src="{{ url_for('static', filename='uploads/' + category.profile_image) }}" alt="{{ category.title }}" style="width: 110px; height: 110px; object-fit: cover; border-radius: 50%; border: 4px solid var(--accent); margin-left: auto; box-shadow: 0 8px 25px rgba(0,0,0,0.4);" class="lightbox-trigger" data-caption="{{ category.title }} Official Header">
+            {% endif %}
+        </div>
+        <p class="sub-page-desc">{{ category.description }}</p>
+
+        {% if current_user.is_authenticated %}
+        <div style="margin-top: 1.5rem;">
+            <button onclick="document.getElementById('edit-cat-form').style.display='block'" style="background: var(--accent); color: white; border: none; padding: 0.6rem 1.5rem; border-radius: 25px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 15px rgba(212, 129, 53, 0.4);">✏️ Edit {{ category.title }} Portal Info</button>
+        </div>
+        {% endif %}
+    </div>
+
+    {% if current_user.is_authenticated %}
+    <!-- Admin Edit Form -->
+    <div id="edit-cat-form" style="display: none; background: #fff; padding: 2rem; border-radius: 20px; margin-bottom: 2.5rem; border: 2px solid var(--accent); box-shadow: 0 15px 35px rgba(0,0,0,0.15);">
+        <h3 style="margin-bottom: 1rem; color: var(--primary); font-size: 1.4rem;">Edit {{ category.title }} Portal Details</h3>
+        <form action="{{ url_for('edit_category', category_id=category.id) }}" method="POST" enctype="multipart/form-data">
+            <textarea name="description" rows="4" style="width: 100%; padding: 0.8rem; border: 1px solid #ccc; border-radius: 10px; margin-bottom: 1rem;" placeholder="Description...">{{ category.description }}</textarea>
+            <div style="margin-bottom: 1.25rem;">
+                <label style="display: block; font-size: 0.9rem; color: #555; margin-bottom: 0.3rem;">Replace Header Avatar Image (Optional):</label>
+                <input type="file" name="profile_image" accept="image/*">
+            </div>
+            <div style="display: flex; gap: 0.75rem;">
+                <button type="submit" class="cta-btn" style="padding: 0.6rem 1.75rem; border: none; cursor: pointer;">Save Changes</button>
+                <button type="button" onclick="document.getElementById('edit-cat-form').style.display='none'" style="padding: 0.6rem 1.5rem; background: #e0e0e0; border: none; border-radius: 30px; cursor: pointer; color: #333; font-weight: 600;">Cancel</button>
+            </div>
+        </form>
+    </div>
+    {% endif %}
+
+    <!-- Main Sub-Page Content Grid -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 2.25rem; margin-bottom: 3rem;">
+        
+        <!-- Left Column: Image Gallery -->
+        <div class="category-section-box">
+            <h2 style="color: var(--primary); font-size: 1.6rem; margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: space-between;">
+                <span>📸 Photo Gallery</span>
+                <small style="font-size: 0.9rem; color: var(--text-muted); font-weight: normal;">{{ images|length }} items</small>
+            </h2>
+
+            <div class="image-grid">
+                {% for img in images %}
+                <div class="image-card lightbox-trigger" data-caption="{{ category.title }} Gallery Image">
+                    <img src="{{ url_for('static', filename='uploads/' + img.filename) }}" alt="{{ category.title }} Image">
+                    {% if current_user.is_authenticated %}
+                    <form action="{{ url_for('delete_image', image_id=img.id) }}" method="POST" style="margin:0;" onsubmit="return confirm('Delete image?');">
+                        <button type="submit" class="delete-btn" title="Remove">&times;</button>
+                    </form>
+                    {% endif %}
+                </div>
+                {% else %}
+                <div style="grid-column: 1 / -1; padding: 2.5rem; text-align: center; color: var(--text-muted); background: rgba(0,0,0,0.03); border-radius: 12px;">
+                    <p style="margin: 0; font-size: 1.05rem;">No gallery photos uploaded for {{ category.title }} yet.</p>
+                </div>
+                {% endfor %}
+            </div>
+
+            {% if current_user.is_authenticated %}
+            <div style="background: rgba(44, 74, 59, 0.06); padding: 1.25rem; border-radius: 14px; margin-top: 1.5rem;">
+                <strong style="display: block; margin-bottom: 0.5rem; color: var(--primary);">Upload New Gallery Photo:</strong>
+                <form action="{{ url_for('upload_image') }}" method="POST" enctype="multipart/form-data" style="display: flex; gap: 0.5rem;">
+                    <input type="hidden" name="category" value="{{ category.id }}">
+                    <input type="file" name="image" accept="image/*" required style="flex-grow: 1;">
+                    <button type="submit" class="cta-btn" style="padding: 0.5rem 1.25rem; border: none; font-size: 0.9rem; cursor: pointer;">Upload</button>
+                </form>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Right Column: Updates & Announcements Ticker -->
+        <div class="category-section-box">
+            <h2 style="color: var(--primary); font-size: 1.6rem; margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: space-between;">
+                <span>📢 Updates & Notices</span>
+                <small style="font-size: 0.9rem; color: var(--text-muted); font-weight: normal;">{{ events|length }} updates</small>
+            </h2>
+
+            <div style="background: rgba(0,0,0,0.03); border-radius: 16px; padding: 1.25rem; min-height: 250px;">
+                <ul style="list-style: none; padding: 0; margin: 0;">
+                    {% for ev in events %}
+                    <li style="background: #ffffff; padding: 1.25rem; border-radius: 12px; margin-bottom: 1rem; box-shadow: 0 4px 12px rgba(0,0,0,0.04); position: relative; border-left: 4px solid var(--accent);">
+                        <span class="tag-badge">{{ ev.tag }}</span>
+                        <p style="margin: 0.6rem 0 0; color: var(--text-dark); line-height: 1.6; font-size: 1.05rem;">{{ ev.description }}</p>
+                        {% if current_user.is_authenticated %}
+                        <form action="{{ url_for('delete_portal_event', event_id=ev.id) }}" method="POST" style="position: absolute; top: 1rem; right: 1rem; margin: 0;" onsubmit="return confirm('Delete update?');">
+                            <button type="submit" style="background: #dc3545; color: white; border: none; padding: 0.25rem 0.6rem; border-radius: 6px; font-size: 0.75rem; cursor: pointer;">Delete</button>
+                        </form>
+                        {% endif %}
+                    </li>
+                    {% else %}
+                    <li style="text-align: center; color: var(--text-muted); padding: 3rem 0;">
+                        <p style="margin: 0; font-size: 1.05rem;">No updates posted for {{ category.title }} at this moment.</p>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+
+            {% if current_user.is_authenticated %}
+            <div style="background: rgba(212, 129, 53, 0.08); padding: 1.25rem; border-radius: 14px; margin-top: 1.5rem;">
+                <strong style="display: block; margin-bottom: 0.5rem; color: var(--accent);">Post New Category Notice:</strong>
+                <form action="{{ url_for('add_portal_event') }}" method="POST" style="display: flex; flex-direction: column; gap: 0.6rem;">
+                    <input type="hidden" name="category_id" value="{{ category.id }}">
+                    <input type="text" name="tag" placeholder="Tag (e.g. Announcement / Timings / Event)" required style="padding: 0.6rem; border: 1px solid #ccc; border-radius: 8px;">
+                    <input type="text" name="description" placeholder="Notice / Update details..." required style="padding: 0.6rem; border: 1px solid #ccc; border-radius: 8px;">
+                    <button type="submit" class="cta-btn" style="border: none; padding: 0.6rem; cursor: pointer; font-size: 0.9rem;">Post Update</button>
+                </form>
+            </div>
+            {% endif %}
+        </div>
+
+    </div>
+
+    {% if category.id == 'agriculture' %}
+    <!-- Local Mandi Crop Prices & Farmer Guide -->
+    <div class="category-section-box" style="border: 2px solid var(--accent); margin-bottom: 3rem;">
+        <h2 style="color: var(--accent); font-size: 1.8rem; margin-bottom: 0.5rem;" data-en="🌾 Local Mandi Crop Prices (Nayagarh Market)" data-or="🌾 ସ୍ଥାନୀୟ ମଣ୍ଡି ଫସଲ ଦର (ନୟାଗଡ଼)">🌾 Local Mandi Crop Prices (Nayagarh Market)</h2>
+        <p style="color: var(--text-muted); font-size: 1.05rem; margin-bottom: 1.5rem;" data-en="Official daily rates for agricultural produce in Nayagarh Mandi & Sankhei Local Market." data-or="ନୟାଗଡ଼ ମଣ୍ଡି ଏବଂ ସଂକେଇ ବଜାରର ସରକାରୀ ଫସଲ ଦର।">Official daily rates for agricultural produce in Nayagarh Mandi & Sankhei Local Market.</p>
+
+        <div style="overflow-x: auto;">
+            <table class="mandi-table">
+                <thead>
+                    <tr>
+                        <th data-en="Crop Name" data-or="ଫସଲ ନାମ">Crop Name</th>
+                        <th data-en="Market Rate" data-or="ମଣ୍ଡି ଦର">Market Rate</th>
+                        <th data-en="Unit" data-or="ଏକକ">Unit</th>
+                        <th data-en="Market Mandi" data-or="ମଣ୍ଡି ସ୍ଥାନ">Market Mandi</th>
+                        {% if current_user.is_authenticated %}<th>Action</th>{% endif %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in mandi_prices %}
+                    <tr>
+                        <td><strong style="font-size: 1.05rem; color: var(--primary);">{{ item.crop_name }}</strong></td>
+                        <td><span class="mandi-price-badge">{{ item.price }}</span></td>
+                        <td>{{ item.unit }}</td>
+                        <td>{{ item.market }}</td>
+                        {% if current_user.is_authenticated %}
+                        <td>
+                            <form action="{{ url_for('delete_mandi_price', price_id=item.id) }}" method="POST" style="margin: 0;" onsubmit="return confirm('Delete price entry?');">
+                                <button type="submit" style="background: #dc3545; color: white; border: none; padding: 0.25rem 0.6rem; border-radius: 6px; font-size: 0.8rem; cursor: pointer;">Delete</button>
+                            </form>
+                        </td>
+                        {% endif %}
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="4" style="text-align: center; color: var(--text-muted);">No Mandi prices listed currently.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% if current_user.is_authenticated %}
+        <div style="background: var(--bg-light); padding: 1.25rem; border-radius: 14px; margin-top: 1.5rem;">
+            <strong style="display: block; margin-bottom: 0.5rem; color: var(--text-dark);">Add New Mandi Crop Rate:</strong>
+            <form action="{{ url_for('add_mandi_price') }}" method="POST" style="display: flex; gap: 0.6rem; flex-wrap: wrap;">
+                <input type="text" name="crop_name" placeholder="Crop Name (e.g. Paddy)" required style="padding: 0.6rem; border: 1px solid #ccc; border-radius: 8px;">
+                <input type="text" name="price" placeholder="Price (e.g. ₹2,183 / Qtl)" required style="padding: 0.6rem; border: 1px solid #ccc; border-radius: 8px;">
+                <input type="text" name="market" placeholder="Market (e.g. Nayagarh Mandi)" value="Nayagarh Mandi" style="padding: 0.6rem; border: 1px solid #ccc; border-radius: 8px;">
+                <button type="submit" class="cta-btn" style="border: none; padding: 0.6rem 1.25rem; cursor: pointer; font-size: 0.9rem;">Add Rate</button>
+            </form>
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    <!-- Back to Hub Footer -->
+    <div style="text-align: center; margin-bottom: 4rem;">
+        <a href="{{ url_for('portal') }}" class="portal-explore-btn" style="background: var(--accent);">
+            &larr; Back to Portal Directory
+        </a>
+    </div>
+
+</div>
+{% endblock %}

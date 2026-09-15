@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Sankhei Village - Nayagarh, Odisha{% endblock %}</title>
+    <meta name="description" content="Discover Sankhei Village in Nayagarh district, Odisha. Explore ancient shrines, cultural festivals like Danda Yatra, map locations, and community notices.">
+    <meta name="keywords" content="Sankhei, Nayagarh, Odisha, Danda Yatra, Kapileswar Temple, Village Portal">
+    
+    <!-- OpenGraph Meta Tags for WhatsApp/Facebook Share Preview -->
+    <meta property="og:title" content="Sankhei Village - Heart of Nayagarh, Odisha">
+    <meta property="og:description" content="Discover our vibrant village, ancient shrines, culture, and community portal.">
+    <meta property="og:type" content="website">
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <style>
+        /* Extra styles for portal layout */
+        body { padding-top: 100px; background-color: var(--bg-light); color: var(--text-dark); }
+        .navbar.scrolled, .navbar { background: rgba(18, 26, 22, 0.95); }
+        .flash-messages { max-width: 800px; margin: 0 auto 2rem; }
+        .flash { padding: 1rem; border-radius: 8px; margin-bottom: 1rem; }
+        .flash.success { background: #d4edda; color: #155724; }
+        .flash.error { background: #f8d7da; color: #721c24; }
+    </style>
+</head>
+<body>
+    <!-- Full Screen Loader -->
+    <div id="page-loader" class="page-loader">
+        <div class="loader-content">
+            <h2 class="loader-logo">Sankhei<span>.</span></h2>
+            <div class="spinner"></div>
+        </div>
+    </div>
+    <script>
+        (function() {
+            function hideLoader() {
+                var l = document.getElementById('page-loader');
+                if (l) l.classList.add('hidden');
+            }
+            if (document.readyState === 'complete') hideLoader();
+            else window.addEventListener('load', hideLoader);
+            setTimeout(hideLoader, 1000);
+        })();
+    </script>
+
+    <!-- Navbar -->
+    <nav class="navbar scrolled">
+        <div class="nav-container">
+            <a href="{{ url_for('index') }}" class="logo">Sankhei<span>.</span></a>
+            <div class="nav-right-controls" style="display: flex; align-items: center; gap: 1rem;">
+                <!-- Weather Widget -->
+                <div id="weather-widget" style="color: #fff; font-size: 0.85rem; display: flex; align-items: center; gap: 0.4rem; background: rgba(255,255,255,0.1); padding: 0.25rem 0.75rem; border-radius: 20px;">
+                    <span id="weather-icon">☁️</span>
+                    <span id="weather-temp">--°C</span>
+                </div>
+                <!-- Live Clock Widget -->
+                <div id="clock-widget" title="Local Time in Sankhei (IST)">
+                    <span>🕒</span>
+                    <span id="clock-time">00:00:00</span>
+                </div>
+                <!-- Language Switcher -->
+                <button id="lang-toggle" class="lang-toggle-btn" title="Toggle Language (EN / ଓଡ଼ିଆ)">
+                    🌐 <span id="lang-label">EN</span>
+                </button>
+                <!-- Ambient Sound Player -->
+                <button id="ambient-audio-btn" class="audio-btn" title="Play Peaceful Ambient Village Music">
+                    <span id="audio-label">🔇 Sound OFF</span>
+                </button>
+                <!-- Theme Toggle -->
+                <button id="theme-toggle" class="theme-btn" title="Toggle Theme">
+                    🌙
+                </button>
+                <div class="menu-icon" id="menu-icon">
+                    <div class="bar1"></div>
+                    <div class="bar2"></div>
+                    <div class="bar3"></div>
+                </div>
+            </div>
+            <ul class="nav-links" id="nav-links">
+                <li><a href="{{ url_for('index') }}" data-en="Home" data-or="ମୁଖ୍ୟ ପୃଷ୍ଠା">Home</a></li>
+                <li><a href="{{ url_for('history') }}" data-en="History" data-or="ଇତିହାସ">History</a></li>
+                <li><a href="{{ url_for('announcements') }}" data-en="Announcements" data-or="ବିଜ୍ଞପ୍ତି">Announcements</a></li>
+                <li><a href="{{ url_for('map_page') }}" data-en="Map" data-or="ମାନଚିତ୍ର">Map</a></li>
+                <li><a href="{{ url_for('portal') }}" data-en="Portal" data-or="ପୋର୍ଟାଲ୍">Portal</a></li>
+                <li><a href="{{ url_for('contact') }}" data-en="Contact" data-or="ଯୋଗାଯୋଗ">Contact</a></li>
+                {% if current_user.is_authenticated %}
+                <li><a href="{{ url_for('change_password') }}" data-en="Change Password" data-or="ପାସୱାର୍ଡ ବଦଳାନ୍ତୁ">Change Password</a></li>
+                <li><a href="{{ url_for('logout') }}" data-en="Logout" data-or="ଲଗଆଉଟ୍">Logout</a></li>
+                {% else %}
+                <li><a href="{{ url_for('login') }}" data-en="Login" data-or="ଲଗଇନ୍">Login</a></li>
+                {% endif %}
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container" style="min-height: 80vh; padding: 2rem;">
+        <div class="flash-messages">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="flash {{ category }}">{{ message }}</div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+        </div>
+        
+        {% block content %}{% endblock %}
+    </div>
+
+    <!-- Lightbox Image Modal -->
+    <div id="lightbox-modal" class="lightbox-modal">
+        <span class="lightbox-close" id="lightbox-close">&times;</span>
+        <img class="lightbox-content" id="lightbox-img" alt="Enlarged gallery view">
+        <div class="lightbox-caption" id="lightbox-caption"></div>
+    </div>
+
+    <!-- Floating Back-to-Top Button -->
+    <button id="back-to-top" class="back-to-top" title="Go to top">↑</button>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-bottom" style="border: none; padding-top: 0; display: flex; flex-direction: column; align-items: center; gap: 0.5rem;">
+                <!-- Running Developer Credit Marquee Ticker -->
+                <div class="developer-marquee-wrapper" title="Hover to pause marquee">
+                    <div class="developer-marquee-content">
+                        <div class="developer-marquee-item">
+                            <span class="developer-badge-icon">💻 DEVELOPER</span>
+                            <span data-en="Developed by Dillip Dalei S/O Laxman Dalei ,Sankhei , Nayagarh ,Odisha" data-or="ବିକାଶକର୍ତ୍ତା: ଦିଲ୍ଲୀପ ଦଳେଇ, ପିତା: ଲକ୍ଷ୍ମଣ ଦଳେଇ, ସଂକେଇ, ନୟାଗଡ଼, ଓଡ଼ିଶା">Developed by Dillip Dalei S/O Laxman Dalei ,Sankhei , Nayagarh ,Odisha</span>
+                        </div>
+                        <div class="developer-marquee-item">
+                            <span class="developer-badge-icon">💻 DEVELOPER</span>
+                            <span data-en="Developed by Dillip Dalei S/O Laxman Dalei ,Sankhei , Nayagarh ,Odisha" data-or="ବିକାଶକର୍ତ୍ତା: ଦିଲ୍ଲୀପ ଦଳେଇ, ପିତା: ଲକ୍ଷ୍ମଣ ଦଳେଇ, ସଂକେଇ, ନୟାଗଡ଼, ଓଡ଼ିଶା">Developed by Dillip Dalei S/O Laxman Dalei ,Sankhei , Nayagarh ,Odisha</span>
+                        </div>
+                    </div>
+                </div>
+                <p>&copy; 2026 Sankhei Village. All rights reserved.</p>
+                <div class="visitor-counter-badge" title="Total Website Visits">
+                    <span>👁️</span> 
+                    <span data-en="Total Visitors:" data-or="ମୋଟ ଦର୍ଶକ:">Total Visitors:</span> 
+                    <strong>{{ "{:,}".format(visitor_count) }}</strong>
+                </div>
+            </div>
+        </div>
+    </footer>
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>
+

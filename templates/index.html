@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sankhei - The Heart of Nayagarh</title>
+    <meta name="description" content="Discover Sankhei, a beautiful and vibrant village situated in the Nayagarh district of Odisha, India.">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <!-- Full Screen Loader -->
+    <div id="page-loader" class="page-loader">
+        <div class="loader-content">
+            <h2 class="loader-logo">Sankhei<span>.</span></h2>
+            <div class="spinner"></div>
+        </div>
+    </div>
+    <script>
+        (function() {
+            function hideLoader() {
+                var l = document.getElementById('page-loader');
+                if (l) l.classList.add('hidden');
+            }
+            if (document.readyState === 'complete') hideLoader();
+            else window.addEventListener('load', hideLoader);
+            setTimeout(hideLoader, 1000);
+        })();
+    </script>
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="#" class="logo">Sankhei<span>.</span></a>
+            <div class="nav-right-controls" style="display: flex; align-items: center; gap: 1rem;">
+                <!-- Weather Widget -->
+                <div id="weather-widget" style="color: #fff; font-size: 0.85rem; display: flex; align-items: center; gap: 0.4rem; background: rgba(255,255,255,0.1); padding: 0.25rem 0.75rem; border-radius: 20px;">
+                    <span id="weather-icon">☁️</span>
+                    <span id="weather-temp">--°C</span>
+                </div>
+                <!-- Live Clock Widget -->
+                <div id="clock-widget" title="Local Time in Sankhei (IST)">
+                    <span>🕒</span>
+                    <span id="clock-time">00:00:00</span>
+                </div>
+                <!-- Language Switcher -->
+                <button id="lang-toggle" class="lang-toggle-btn" title="Toggle Language (EN / ଓଡ଼ିଆ)">
+                    🌐 <span id="lang-label">EN</span>
+                </button>
+                <!-- Theme Toggle -->
+                <button id="theme-toggle" class="theme-btn" title="Toggle Theme">
+                    🌙
+                </button>
+                <div class="menu-icon" id="menu-icon">
+                    <div class="bar1"></div>
+                    <div class="bar2"></div>
+                    <div class="bar3"></div>
+                </div>
+            </div>
+            <ul class="nav-links" id="nav-links">
+                <li><a href="{{ url_for('index') }}#home" data-en="Home" data-or="ମୁଖ୍ୟ ପୃଷ୍ଠା">Home</a></li>
+                <li><a href="{{ url_for('index') }}#about" data-en="About" data-or="ବିଷୟରେ">About</a></li>
+                <li><a href="{{ url_for('index') }}#culture" data-en="Culture" data-or="ସଂସ୍କୃତି">Culture</a></li>
+                <li><a href="{{ url_for('index') }}#gallery" data-en="Gallery" data-or="ଗ୍ୟାଲେରୀ">Gallery</a></li>
+                <li><a href="{{ url_for('portal') }}" data-en="Portal" data-or="ପୋର୍ଟାଲ୍">Portal</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Hero Section with Dual Maps -->
+    <header id="home" class="hero hero-split">
+        <div class="hero-bg-container"></div>
+        
+        <div class="container hero-container">
+            <!-- Center Hero Banner Text -->
+            <div class="hero-content fade-in-up">
+                <p class="subtitle" data-en="Nayagarh, Odisha" data-or="ନୟାଗଡ଼, ଓଡ଼ିଶା">Nayagarh, Odisha</p>
+                <h1 data-en="Welcome to Sankhei" data-or="ସଂକେଇ ଗ୍ରାମକୁ ସ୍ୱାଗତ">Welcome to <span>Sankhei</span></h1>
+                <p class="description" data-en="Where nature's tranquility meets vibrant Odia heritage." data-or="ଯେଉଁଠି ପ୍ରକୃତିର ଶାନ୍ତି ଏବଂ ପ୍ରାଚୀନ ଓଡ଼ିଆ ସଂସ୍କୃତିର ମିଳନ ଘଟେ।">Where nature's tranquility meets vibrant Odia heritage.</p>
+                <a href="#about" class="cta-btn" data-en="Discover Our Story" data-or="ଆମ କାହାଣୀ ଜାଣନ୍ତୁ">Discover Our Story</a>
+            </div>
+
+            <!-- Dual Map Showcase Cards -->
+            <div class="hero-maps-grid fade-in-up">
+                <!-- Left Card: Odisha Map -->
+                <div class="hero-map-card lightbox-trigger" data-caption="Odisha State Map highlighting Nayagarh District & Sankhei Village Location">
+                    <div class="map-card-badge">📍 Odisha State → Nayagarh</div>
+                    <img src="{{ url_for('static', filename='images/odisha_map.png') }}" alt="Odisha Map Highlighting Sankhei" loading="lazy">
+                    <div class="map-card-footer">
+                        <span data-en="Odisha Regional Map" data-or="ଓଡ଼ିଶା ଆଞ୍ଚଳିକ ମାନଚିତ୍ର">Odisha Regional Map</span>
+                        <small data-en="Click to enlarge 🔍" data-or="ବଡ଼ କରି ଦେଖନ୍ତୁ 🔍">Click to enlarge 🔍</small>
+                    </div>
+                </div>
+
+                <!-- Right Card: Sankhei Village Map -->
+                <div class="hero-map-card lightbox-trigger" data-caption="Accurate Cartographic Layout Map of Sankhei Village (Nayagarh, Odisha) showing shrines, schools, pond, and roads">
+                    <div class="map-card-badge">🏡 Sankhei Village Cartographic Map</div>
+                    <img src="{{ url_for('static', filename='images/sankhei_map.png') }}" alt="Accurate Cartographic Map of Sankhei Village" loading="lazy">
+                    <div class="map-card-footer">
+                        <span data-en="Accurate Sankhei Layout Map" data-or="ସଂକେଇ ଗ୍ରାମର ସଠିକ୍ ନକ୍ସା">Accurate Sankhei Layout Map</span>
+                        <a href="{{ url_for('map_page') }}" style="color: var(--accent); text-decoration: underline; font-size: 0.85rem;" data-en="Interactive Map &rarr;" data-or="ଇଣ୍ଟରାକ୍ଟିଭ୍ ମାନଚିତ୍ର &rarr;">Interactive Map &rarr;</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="scroll-indicator">
+            <span>Scroll</span>
+            <div class="line"></div>
+        </div>
+    </header>
+
+    <section id="about" class="section about">
+        <div class="container">
+            <div class="about-grid">
+                <div class="about-text scroll-reveal">
+                    <h2>{{ site_content['home_about'].title|replace('\n', '<br>')|safe if site_content.get('home_about') else 'The Essence of <br>Our Village' }}</h2>
+                    {% if site_content.get('home_about') %}
+                        {% for paragraph in site_content['home_about'].content.split('\n\n') %}
+                            <p>{{ paragraph }}</p>
+                        {% endfor %}
+                    {% endif %}
+                    <div class="stats">
+                        <div class="stat-item">
+                            <h3>Education</h3>
+                            <p>Up to 10th Standard</p>
+                        </div>
+                        <div class="stat-item">
+                            <h3>Facilities</h3>
+                            <p>Hospital & Market</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="about-image scroll-reveal delay">
+                    <img src="{{ url_for('static', filename='uploads/' + site_content['home_about'].image_filename if site_content.get('home_about') and site_content['home_about'].image_filename else 'images/village_temple_1788245881477.png') }}" alt="Village About Image" loading="lazy">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Village Services (Quick Dial) -->
+    <section id="services" class="section services" style="background-color: var(--bg-dark); color: var(--text-main);">
+        <div class="container">
+            <div class="section-header center scroll-reveal">
+                <h2>Village Services</h2>
+                <p>Quick access to essential contacts in Sankhei.</p>
+                <div style="margin-top: 1rem;">
+                    <button class="print-directory-btn cta-btn" style="padding: 0.5rem 1.5rem; font-size: 0.85rem; border: none; cursor: pointer;">📄 Print Emergency Directory</button>
+                </div>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem;">
+                
+                <!-- Hospital -->
+                <div class="service-card scroll-reveal">
+                    <div class="service-icon">🏥</div>
+                    <h3>Primary Hospital</h3>
+                    <p>24/7 Emergency & General Care</p>
+                    <a href="tel:+919999999999" class="call-btn">Call Now</a>
+                </div>
+
+                <!-- Police -->
+                <div class="service-card scroll-reveal delay-1">
+                    <div class="service-icon">🚓</div>
+                    <h3>Local Police</h3>
+                    <p>Safety & Security (Nayagarh)</p>
+                    <a href="tel:100" class="call-btn">Call 100</a>
+                </div>
+
+                <!-- Ambulance -->
+                <div class="service-card scroll-reveal delay-2">
+                    <div class="service-icon">🚑</div>
+                    <h3>Ambulance</h3>
+                    <p>Immediate Medical Transport</p>
+                    <a href="tel:108" class="call-btn">Call 108</a>
+                </div>
+
+                <!-- Sarapanch -->
+                <div class="service-card scroll-reveal delay-3">
+                    <div class="service-icon">🏛️</div>
+                    <h3>Sarapanch Office</h3>
+                    <p>Village Administration</p>
+                    <a href="tel:+918888888888" class="call-btn">Contact Office</a>
+                </div>
+
+            </div>
+
+            <!-- Odia Cultural Festival Countdown Card -->
+            <div class="festival-countdown-card scroll-reveal" style="margin-top: 3rem;">
+                <h3 style="font-size: 1.6rem; color: var(--accent); margin-bottom: 0.5rem;" data-en="🔥 Upcoming Grand Celebration: Danda Yatra" data-or="🔥 ଆଗାମୀ ମହାପର୍ବ: ଦଣ୍ଡ ଯାତ୍ରା">🔥 Upcoming Grand Celebration: Danda Yatra</h3>
+                <p style="color: var(--text-muted); font-size: 1rem;" data-en="Countdown to the sacred festival at Baba Kapileswar Shiv Temple & Goddess Kali Shrine." data-or="ବାବା କପିଳେଶ୍ୱର ଶିବ ମନ୍ଦିର ଏବଂ ମାଆ କାଳୀଙ୍କ ମହାପର୍ବ ପାଇଁ କାଉଣ୍ଟଡାଉନ୍।">Countdown to the sacred festival at Baba Kapileswar Shiv Temple & Goddess Kali Shrine.</p>
+                
+                <div class="countdown-timer-grid">
+                    <div class="countdown-unit-box">
+                        <div class="countdown-num" id="cd-days">00</div>
+                        <div class="countdown-lbl" data-en="Days" data-or="ଦିନ">Days</div>
+                    </div>
+                    <div class="countdown-unit-box">
+                        <div class="countdown-num" id="cd-hours">00</div>
+                        <div class="countdown-lbl" data-en="Hours" data-or="ଘଣ୍ଟା">Hours</div>
+                    </div>
+                    <div class="countdown-unit-box">
+                        <div class="countdown-num" id="cd-mins">00</div>
+                        <div class="countdown-lbl" data-en="Mins" data-or="ମିନିଟ୍">Mins</div>
+                    </div>
+                    <div class="countdown-unit-box">
+                        <div class="countdown-num" id="cd-secs">00</div>
+                        <div class="countdown-lbl" data-en="Secs" data-or="ସେକେଣ୍ଡ">Secs</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Culture Section -->
+    <section id="culture" class="section culture">
+        <div class="container">
+            <div class="section-header center scroll-reveal">
+                <h2>Tradition & Heritage</h2>
+                <p>A living tapestry of festivals, art, and devotion.</p>
+            </div>
+            <div class="culture-grid">
+                <div class="culture-image scroll-reveal">
+                    <img src="{{ url_for('static', filename='uploads/' + site_content['home_culture_1'].image_filename if site_content.get('home_culture_1') and site_content['home_culture_1'].image_filename else 'images/village_culture_1788245901170.png') }}" alt="Village Festival" loading="lazy">
+                </div>
+                <div class="culture-content scroll-reveal delay">
+                    <div class="culture-item">
+                        <h3>{{ site_content['home_culture_1'].title if site_content.get('home_culture_1') else 'Vibrant Festivals' }}</h3>
+                        <p>{{ site_content['home_culture_1'].content if site_content.get('home_culture_1') else 'Our biggest celebration is the grand Danda Yatra. We joyously celebrate all major Odia festivals including Raja Parba, Dasahara, and Maha Shiva Ratri, bringing the entire community together in vibrant harmony.' }}</p>
+                    </div>
+                    <div class="culture-item">
+                        <h3>{{ site_content['home_culture_2'].title if site_content.get('home_culture_2') else 'Spiritual Roots' }}</h3>
+                        <p>{{ site_content['home_culture_2'].content if site_content.get('home_culture_2') else 'Sankhei is deeply spiritual, blessed by our revered deities. We offer our devotion at the Baba Kapileswar Shiv Temple, Shree Raghunath Mandir, Maa Ramchandi Mandir, Maa Bhairavi Mandir, Maa Khilamunda Mandir, and we also devoutly worship Shani Dev.' }}</p>
+                    </div>
+                    <div class="culture-item">
+                        <h3>{{ site_content['home_culture_3'].title if site_content.get('home_culture_3') else 'Community Life' }}</h3>
+                        <p>{{ site_content['home_culture_3'].content if site_content.get('home_culture_3') else 'The rhythmic, simple lifestyle of our welcoming community is marked by harmony. Every sunrise over our beautiful village brings a new canvas of vibrant earthy colors, painting a picture of togetherness and deep-rooted traditions.' }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Events & Highlights Section -->
+    <section id="highlights" class="section highlights" style="background-color: var(--bg-light);">
+        <div class="container">
+            <div class="highlights-grid">
+                <!-- Important Events Vertical Ticker -->
+                <div class="events-container scroll-reveal">
+                    <div class="section-header" style="margin-bottom: 2rem;">
+                        <h2 style="font-size: 2rem;">Important Events</h2>
+                        <p style="font-size: 1rem;">Stay updated with Sankhei</p>
+                    </div>
+                    <div class="ticker-wrapper">
+                        <ul class="ticker-content">
+                            {% for event in events %}
+                            <li><span class="date">{{ event.tag }}</span> {{ event.description }}</li>
+                            {% else %}
+                            <li><span class="date">Notice</span> No upcoming events at this moment.</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Image Slideshow -->
+                <div class="slideshow-container scroll-reveal delay">
+                    <div class="section-header" style="margin-bottom: 2rem;">
+                        <h2 style="font-size: 2rem;">Village Glimpses</h2>
+                        <p style="font-size: 1rem;">Swipe through our heritage</p>
+                    </div>
+                    <div class="slider" id="village-slider">
+                        <div class="slides">
+                            {% for img in slideshow_images %}
+                            <div class="slide {% if loop.first %}active{% endif %}">
+                                <img src="{{ url_for('static', filename='uploads/' + img.filename) }}" alt="Slideshow Image">
+                            </div>
+                            {% else %}
+                            <div class="slide active">
+                                <img src="{{ url_for('static', filename='images/hero_village_1788245846872.png') }}" alt="Default Slide">
+                                <div class="slide-caption">Serene Dawn over Paddy Fields</div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        <button class="slider-btn prev" onclick="moveSlide('village-slider', -1)">&#10094;</button>
+                        <button class="slider-btn next" onclick="moveSlide('village-slider', 1)">&#10095;</button>
+                        <div class="slider-dots">
+                            {% for img in slideshow_images %}
+                            <span class="dot {% if loop.first %}active{% endif %}" onclick="currentSlide('village-slider', {{ loop.index0 }})"></span>
+                            {% else %}
+                            <span class="dot active" onclick="currentSlide('village-slider', 0)"></span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Gallery Section (Glassmorphism) -->
+    <section id="gallery" class="section gallery">
+        <div class="container">
+            <div class="section-header scroll-reveal">
+                <h2>Glimpses of Sankhei</h2>
+                <p>Experience the visual poetry of our village.</p>
+            </div>
+            <div class="gallery-grid">
+                <div class="gallery-item scroll-reveal lightbox-trigger" data-caption="Serene Dawn over Sankhei Landscape">
+                    <img src="{{ url_for('static', filename='images/hero_village_1788245846872.png') }}" alt="Sankhei Landscape" loading="lazy">
+                    <div class="gallery-overlay">
+                        <span>Serene Dawn</span>
+                    </div>
+                </div>
+                <div class="gallery-item scroll-reveal delay-1 lightbox-trigger" data-caption="Ancient Echoes of Baba Kapileswar Shiv Temple">
+                    <img src="{{ url_for('static', filename='images/village_temple_1788245881477.png') }}" alt="Temple" loading="lazy">
+                    <div class="gallery-overlay">
+                        <span>Ancient Echoes</span>
+                    </div>
+                </div>
+                <div class="gallery-item scroll-reveal delay-2 lightbox-trigger" data-caption="Joyous Celebrations & Vibrant Odia Culture">
+                    <img src="{{ url_for('static', filename='images/village_culture_1788245901170.png') }}" alt="Festival" loading="lazy">
+                    <div class="gallery-overlay">
+                        <span>Joyous Celebrations</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Lightbox Image Modal -->
+    <div id="lightbox-modal" class="lightbox-modal">
+        <span class="lightbox-close" id="lightbox-close">&times;</span>
+        <img class="lightbox-content" id="lightbox-img" alt="Enlarged view">
+        <div class="lightbox-caption" id="lightbox-caption"></div>
+    </div>
+
+    <!-- Floating Back-to-Top Button -->
+    <button id="back-to-top" class="back-to-top" title="Go to top">↑</button>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <h2>Sankhei.</h2>
+                    <p>Nayagarh, Odisha</p>
+                </div>
+                <div class="footer-links">
+                    <a href="#home">Home</a>
+                    <a href="#about">About</a>
+                    <a href="#culture">Culture</a>
+                    <a href="#gallery">Gallery</a>
+                </div>
+            </div>
+            <div class="footer-bottom" style="display: flex; flex-direction: column; align-items: center; gap: 0.5rem;">
+                <!-- Running Developer Credit Marquee Ticker -->
+                <div class="developer-marquee-wrapper" title="Hover to pause marquee">
+                    <div class="developer-marquee-content">
+                        <div class="developer-marquee-item">
+                            <span class="developer-badge-icon">💻 DEVELOPER</span>
+                            <span data-en="Developed by Dillip Dalei S/O Laxman Dalei ,Sankhei , Nayagarh ,Odisha" data-or="ବିକାଶକର୍ତ୍ତା: ଦିଲ୍ଲୀପ ଦଳେଇ, ପିତା: ଲକ୍ଷ୍ମଣ ଦଳେଇ, ସଂକେଇ, ନୟାଗଡ଼, ଓଡ଼ିଶା">Developed by Dillip Dalei S/O Laxman Dalei ,Sankhei , Nayagarh ,Odisha</span>
+                        </div>
+                        <div class="developer-marquee-item">
+                            <span class="developer-badge-icon">💻 DEVELOPER</span>
+                            <span data-en="Developed by Dillip Dalei S/O Laxman Dalei ,Sankhei , Nayagarh ,Odisha" data-or="ବିକାଶକର୍ତ୍ତା: ଦିଲ୍ଲୀପ ଦଳେଇ, ପିତା: ଲକ୍ଷ୍ମଣ ଦଳେଇ, ସଂକେଇ, ନୟାଗଡ଼, ଓଡ଼ିଶା">Developed by Dillip Dalei S/O Laxman Dalei ,Sankhei , Nayagarh ,Odisha</span>
+                        </div>
+                    </div>
+                </div>
+                <p>&copy; 2026 Sankhei Village. All rights reserved.</p>
+                <div class="visitor-counter-badge" title="Total Website Visits">
+                    <span>👁️</span> 
+                    <span data-en="Total Visitors:" data-or="ମୋଟ ଦର୍ଶକ:">Total Visitors:</span> 
+                    <strong>{{ "{:,}".format(visitor_count) }}</strong>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>
+

@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+{% block title %}Announcements - Sankhei Village{% endblock %}
+
+{% block content %}
+<section class="section" style="padding-top: 150px; min-height: 80vh; background-color: var(--bg-light);">
+    <div class="container">
+        <div class="section-header" style="text-align: center; margin-bottom: 2rem;">
+            <h2 data-en="Public Announcements" data-or="ସରକାରୀ ବିଜ୍ଞପ୍ତି">Public Announcements</h2>
+            <p data-en="Official notices and detailed updates from the Sankhei administration." data-or="ସଂକେଇ ପ୍ରଶାସନରୁ ସରକାରୀ ସୂଚନା ଏବଂ ଅପଡେଟ୍।">Official notices and detailed updates from the Sankhei administration.</p>
+        </div>
+        
+        <!-- Search Bar -->
+        <div style="max-width: 800px; margin: 0 auto 2rem;">
+            <div class="announcement-search-box">
+                <input type="text" id="announcement-search" placeholder="🔍 Search notices by keyword..." style="width: 100%;">
+            </div>
+        </div>
+
+        <div id="announcement-list" style="max-width: 800px; margin: 0 auto;">
+            {% for ann in announcements %}
+            <div class="announcement-card" style="background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); margin-bottom: 2rem;">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem;">
+                    <h3 class="ann-title" style="color: var(--primary); font-size: 1.5rem; margin: 0;">{{ ann.title }}</h3>
+                    <span class="tag-badge">Official</span>
+                </div>
+                <small style="color: var(--accent); font-weight: bold; display: block; margin-bottom: 1.5rem;">Posted on: {{ ann.date_posted.strftime('%B %d, %Y') }}</small>
+                <div class="ann-content" style="color: var(--text-dark); line-height: 1.6; white-space: pre-wrap;">{{ ann.content }}</div>
+            </div>
+            {% else %}
+            <div style="text-align: center; color: var(--text-muted); padding: 3rem; background: white; border-radius: 12px;">
+                <h3>No Announcements</h3>
+                <p>There are no public announcements at this time.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<script>
+    document.getElementById('announcement-search')?.addEventListener('input', function(e) {
+        var query = e.target.value.toLowerCase().trim();
+        var cards = document.querySelectorAll('.announcement-card');
+        
+        cards.forEach(function(card) {
+            var title = card.querySelector('.ann-title')?.textContent.toLowerCase() || '';
+            var content = card.querySelector('.ann-content')?.textContent.toLowerCase() || '';
+            
+            if (!query || title.includes(query) || content.includes(query)) {
+                card.style.display = 'block';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    });
+</script>
+{% endblock %}
+

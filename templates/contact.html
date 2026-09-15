@@ -1,0 +1,120 @@
+{% extends 'base.html' %}
+{% block title %}Contact & Panchayat Suggestion Box - Sankhei Village{% endblock %}
+
+{% block content %}
+<section class="section" style="padding-top: 150px; min-height: 80vh;">
+    <div class="container">
+        <div class="section-header" style="text-align: center; margin-bottom: 3rem;">
+            <h2 data-en="Contact & Panchayat Portal" data-or="ଯୋଗାଯୋଗ ଏବଂ ପଞ୍ଚାୟତ ପୋର୍ଟାଲ୍">Contact & Panchayat Portal</h2>
+            <p data-en="Send a message or submit a suggestion/issue to the Sarapanch Office." data-or="ସରପଞ୍ଚ କାର୍ଯ୍ୟାଳୟକୁ ବାର୍ତ୍ତା କିମ୍ବା ମତାମତ ପଠାନ୍ତୁ।">Send a message or submit a suggestion/issue to the Sarapanch Office.</p>
+        </div>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; margin-bottom: 4rem;">
+            <!-- General Contact Form -->
+            <div style="background: #ffffff; padding: 2.5rem; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); border: 1px solid rgba(0,0,0,0.06);">
+                <h3 style="color: var(--primary); font-size: 1.5rem; margin-bottom: 1.5rem;" data-en="✉️ General Message" data-or="✉️ ସାଧାରଣ ବାର୍ତ୍ତା">✉️ General Message</h3>
+                <form action="{{ url_for('contact') }}" method="POST">
+                    <div style="margin-bottom: 1.25rem;">
+                        <label for="name" style="display: block; margin-bottom: 0.5rem; color: var(--text-dark); font-weight: 600;">Full Name</label>
+                        <input type="text" id="name" name="name" required style="width: 100%; padding: 0.75rem 1rem; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem;">
+                    </div>
+                    
+                    <div style="margin-bottom: 1.25rem;">
+                        <label for="email" style="display: block; margin-bottom: 0.5rem; color: var(--text-dark); font-weight: 600;">Email Address</label>
+                        <input type="email" id="email" name="email" required style="width: 100%; padding: 0.75rem 1rem; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem;">
+                    </div>
+                    
+                    <div style="margin-bottom: 1.5rem;">
+                        <label for="message" style="display: block; margin-bottom: 0.5rem; color: var(--text-dark); font-weight: 600;">Message</label>
+                        <textarea id="message" name="message" rows="4" required style="width: 100%; padding: 0.75rem 1rem; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem; resize: vertical;"></textarea>
+                    </div>
+                    
+                    <button type="submit" class="cta-btn" style="width: 100%; border: none; padding: 0.85rem; font-size: 1rem; cursor: pointer;">Send Message</button>
+                </form>
+            </div>
+
+            <!-- Public Panchayat Suggestion Submission Form -->
+            <div id="suggestions" style="background: #ffffff; padding: 2.5rem; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); border: 1px solid rgba(0,0,0,0.06);">
+                <h3 style="color: var(--accent); font-size: 1.5rem; margin-bottom: 1.5rem;" data-en="📜 Submit Panchayat Suggestion / Issue" data-or="📜 ପଞ୍ଚାୟତ ମତାମତ ଦିଅନ୍ତୁ">📜 Submit Panchayat Suggestion / Issue</h3>
+                <form action="{{ url_for('submit_suggestion') }}" method="POST">
+                    <div style="margin-bottom: 1.25rem;">
+                        <label for="sug_title" style="display: block; margin-bottom: 0.5rem; color: var(--text-dark); font-weight: 600;">Subject / Issue Title</label>
+                        <input type="text" id="sug_title" name="title" placeholder="e.g. Street Light Repair in Ward 3" required style="width: 100%; padding: 0.75rem 1rem; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem;">
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.25rem;">
+                        <div>
+                            <label for="sug_name" style="display: block; margin-bottom: 0.5rem; color: var(--text-dark); font-weight: 600;">Your Name</label>
+                            <input type="text" id="sug_name" name="name" required style="width: 100%; padding: 0.75rem 1rem; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem;">
+                        </div>
+                        <div>
+                            <label for="sug_cat" style="display: block; margin-bottom: 0.5rem; color: var(--text-dark); font-weight: 600;">Category</label>
+                            <select id="sug_cat" name="category" style="width: 100%; padding: 0.75rem 1rem; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem;">
+                                <option value="Infrastructure">Infrastructure / Roads</option>
+                                <option value="Water">Drinking Water</option>
+                                <option value="Sanitation">Sanitation & Drainage</option>
+                                <option value="Education">School & Education</option>
+                                <option value="Health">Healthcare</option>
+                                <option value="General">General Suggestion</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-bottom: 1.5rem;">
+                        <label for="sug_desc" style="display: block; margin-bottom: 0.5rem; color: var(--text-dark); font-weight: 600;">Details & Location</label>
+                        <textarea id="sug_desc" name="description" rows="3" placeholder="Provide clear details for the Panchayat..." required style="width: 100%; padding: 0.75rem 1rem; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem; resize: vertical;"></textarea>
+                    </div>
+                    
+                    <button type="submit" class="cta-btn" style="width: 100%; border: none; padding: 0.85rem; font-size: 1rem; cursor: pointer; background: var(--accent);">Submit to Sarapanch Office</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Public Panchayat Tracker Status Board -->
+        <div style="background: #ffffff; padding: 2.5rem; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); border: 1px solid rgba(0,0,0,0.06);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                <h3 style="color: var(--primary); font-size: 1.75rem; margin: 0;" data-en="📋 Public Panchayat Issue Tracker Board" data-or="📋 ପଞ୍ଚାୟତ ସମସ୍ୟା ଟ୍ରାକର୍ ବୋର୍ଡ">📋 Public Panchayat Issue Tracker Board</h3>
+                <span class="portal-meta-badge">{{ suggestions|length }} Total Submissions</span>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
+                {% for sug in suggestions %}
+                <div class="suggestion-card">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.75rem;">
+                        <h4 style="margin: 0; font-size: 1.1rem; color: var(--primary);">{{ sug.title }}</h4>
+                        {% set st_cls = 'received' %}
+                        {% if sug.status == 'Under Review' %}{% set st_cls = 'review' %}{% endif %}
+                        {% if sug.status == 'Resolved' %}{% set st_cls = 'resolved' %}{% endif %}
+                        <span class="status-badge {{ st_cls }}">{{ sug.status }}</span>
+                    </div>
+
+                    <p style="color: var(--text-dark); font-size: 0.95rem; line-height: 1.5; margin-bottom: 1rem;">{{ sug.description }}</p>
+
+                    <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem; color: var(--text-muted); border-top: 1px solid #eee; padding-top: 0.5rem;">
+                        <span>Submitted by: <strong>{{ sug.name }}</strong> ({{ sug.category }})</span>
+                        <span>{{ sug.date_submitted.strftime('%b %d, %Y') }}</span>
+                    </div>
+
+                    {% if current_user.is_authenticated %}
+                    <form action="{{ url_for('update_suggestion_status', sug_id=sug.id) }}" method="POST" style="margin-top: 0.75rem; display: flex; gap: 0.5rem;">
+                        <select name="status" style="padding: 0.25rem 0.5rem; font-size: 0.85rem; border-radius: 4px; border: 1px solid #ccc;">
+                            <option value="Received" {% if sug.status == 'Received' %}selected{% endif %}>Received</option>
+                            <option value="Under Review" {% if sug.status == 'Under Review' %}selected{% endif %}>Under Review</option>
+                            <option value="Resolved" {% if sug.status == 'Resolved' %}selected{% endif %}>Resolved</option>
+                        </select>
+                        <button type="submit" style="background: var(--primary); color: white; border: none; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.8rem; cursor: pointer;">Update Status</button>
+                    </form>
+                    {% endif %}
+                </div>
+                {% else %}
+                <div style="grid-column: 1 / -1; text-align: center; color: var(--text-muted); padding: 2rem;">
+                    <p>No suggestions or issues submitted yet.</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+    </div>
+</section>
+{% endblock %}
+

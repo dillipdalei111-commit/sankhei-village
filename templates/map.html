@@ -1,0 +1,128 @@
+{% extends 'base.html' %}
+{% block title %}Interactive Map - Sankhei Village{% endblock %}
+
+{% block content %}
+<!-- Leaflet CSS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+
+<section class="section" style="padding-top: 150px; min-height: 80vh;">
+    <div class="container">
+        <div class="section-header" style="text-align: center; margin-bottom: 2rem;">
+            <h2 data-en="Interactive Village Map" data-or="ସଂକେଇ ଗ୍ରାମର ଇଣ୍ଟରାକ୍ଟିଭ୍ ମାନଚିତ୍ର">Interactive Village Map</h2>
+            <p data-en="Explore shrines, schools, healthcare facilities, and offices in Sankhei." data-or="ସଂକେଇ ଗ୍ରାମର ମନ୍ଦିର, ବିଦ୍ୟାଳୟ, ସ୍ୱାସ୍ଥ୍ୟକେନ୍ଦ୍ର ଏବଂ କାର୍ଯ୍ୟାଳୟ ସମୂହ ଅନ୍ୱେଷଣ କରନ୍ତୁ।">Explore shrines, schools, healthcare facilities, and offices in Sankhei.</p>
+        </div>
+
+        <!-- Controls: Filter Chips & Search -->
+        <div class="map-controls-bar">
+            <div class="map-filters" id="map-filters">
+                <button class="filter-chip active" data-type="all">✨ All</button>
+                <button class="filter-chip" data-type="temple">🛕 Temples</button>
+                <button class="filter-chip" data-type="school">🏫 Education</button>
+                <button class="filter-chip" data-type="health">🏥 Health</button>
+                <button class="filter-chip" data-type="admin">🏛️ Panchayat</button>
+            </div>
+            <input type="text" id="map-search" class="map-search-input" placeholder="🔍 Search location in Sankhei...">
+        </div>
+        
+        <div style="background: white; padding: 1rem; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
+            <div id="map" style="height: 600px; width: 100%; border-radius: 8px;"></div>
+        </div>
+    </div>
+</section>
+
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script>
+    // Center roughly on Nayagarh / Sankhei area
+    var map = L.map('map').setView([20.1287, 85.1051], 14);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '© OpenStreetMap'
+    }).addTo(map);
+
+    // Color Markers
+    var icons = {
+        temple: L.icon({
+            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-orange.png',
+            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+            iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41]
+        }),
+        school: L.icon({
+            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-blue.png',
+            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+            iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41]
+        }),
+        health: L.icon({
+            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png',
+            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+            iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41]
+        }),
+        admin: L.icon({
+            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png',
+            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+            iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41]
+        }),
+        default: L.icon({
+            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-violet.png',
+            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+            iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41]
+        })
+    };
+
+    var markerData = [];
+
+    {% for loc in locations %}
+        (function() {
+            var iconType = "{{ loc.icon_type|default('default') }}";
+            var selectedIcon = icons[iconType] || icons.default;
+            var name = "{{ loc.name|replace('\"', '\\\"')|replace('\n', ' ') }}";
+            var desc = "{{ loc.description|default('')|replace('\"', '\\\"')|replace('\n', ' ') }}";
+            
+            var marker = L.marker([{{ loc.latitude }}, {{ loc.longitude }}], {icon: selectedIcon})
+                .bindPopup('<div style="font-family: sans-serif;"><b>' + name + '</b><br>' + desc + '</div>');
+            
+            marker.addTo(map);
+            
+            markerData.push({
+                name: name.toLowerCase(),
+                desc: desc.toLowerCase(),
+                type: iconType,
+                marker: marker
+            });
+        })();
+    {% endfor %}
+
+    // Filter Logic
+    var activeFilter = 'all';
+    var searchQuery = '';
+
+    function filterMapMarkers() {
+        markerData.forEach(function(item) {
+            var matchesType = (activeFilter === 'all' || item.type === activeFilter);
+            var matchesSearch = (!searchQuery || item.name.includes(searchQuery) || item.desc.includes(searchQuery));
+            
+            if (matchesType && matchesSearch) {
+                if (!map.hasLayer(item.marker)) map.addLayer(item.marker);
+            } else {
+                if (map.hasLayer(item.marker)) map.removeLayer(item.marker);
+            }
+        });
+    }
+
+    document.querySelectorAll('#map-filters .filter-chip').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('#map-filters .filter-chip').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            activeFilter = this.getAttribute('data-type');
+            filterMapMarkers();
+        });
+    });
+
+    document.getElementById('map-search').addEventListener('input', function(e) {
+        searchQuery = e.target.value.toLowerCase().trim();
+        filterMapMarkers();
+    });
+</script>
+{% endblock %}
+

@@ -1,0 +1,286 @@
+{% extends 'base.html' %}
+{% block title %}Village Portal Directory - Sankhei{% endblock %}
+
+{% block content %}
+<section class="section" style="padding-top: 130px; min-height: 80vh;">
+    <div class="container">
+        
+        <!-- Portal Hero Banner & Search Header -->
+        <div class="portal-hero-banner">
+            <div class="portal-badge-pill" data-en="⚡ Official Administrative & Community Hub" data-or="⚡ ସରକାରୀ ଓ ସାଧାରଣ ପୋର୍ଟାଲ୍ ଡିରେକ୍ଟୋରୀ">
+                ⚡ Official Administrative & Community Hub
+            </div>
+            
+            <h1 data-en="Sankhei Village Portal Hub" data-or="ସଂକେଇ ଗ୍ରାମ ପୋର୍ଟାଲ୍ ଡିରେକ୍ଟୋରୀ">
+                Sankhei Village <span>Portal Hub</span>
+            </h1>
+            
+            <p data-en="Explore dedicated sub-portals for education, healthcare, village governance, cultural heritage, sacred temples, and live Nayagarh Mandi agricultural rates." data-or="ଶିକ୍ଷା, ସ୍ୱାସ୍ଥ୍ୟ, ଗ୍ରାମ ପଞ୍ଚାୟତ ପ୍ରଶାସନ, ସଂସ୍କୃତି, ମନ୍ଦିର ଏବଂ ନୟାଗଡ଼ ମଣ୍ଡି ଫସଲ ଦର ବିଷୟରେ ଜାଣିବା ପାଇଁ ପୋର୍ଟାଲ୍ ଚୟନ କରନ୍ତୁ।">
+                Explore dedicated sub-portals for education, healthcare, village governance, cultural heritage, sacred temples, and live Nayagarh Mandi agricultural rates.
+            </p>
+
+            <!-- Quick Stats Counters -->
+            <div class="portal-stats-row">
+                <div class="portal-stat-badge">
+                    <span class="portal-stat-icon">🏛️</span>
+                    <div>
+                        <div class="portal-stat-num">{{ category_data|length }}</div>
+                        <div class="portal-stat-lbl" data-en="Active Portals" data-or="ସକ୍ରିୟ ପୋର୍ଟାଲ୍">Active Portals</div>
+                    </div>
+                </div>
+                <div class="portal-stat-badge">
+                    <span class="portal-stat-icon">📸</span>
+                    <div>
+                        <div class="portal-stat-num">{{ images|length }}</div>
+                        <div class="portal-stat-lbl" data-en="Gallery Photos" data-or="ଗ୍ୟାଲେରୀ ଫଟୋ">Gallery Photos</div>
+                    </div>
+                </div>
+                <div class="portal-stat-badge">
+                    <span class="portal-stat-icon">📢</span>
+                    <div>
+                        <div class="portal-stat-num">{{ portal_events|length }}</div>
+                        <div class="portal-stat-lbl" data-en="Live Updates" data-or="ଅପଡେଟ୍ ସୂଚନା">Live Updates</div>
+                    </div>
+                </div>
+                <div class="portal-stat-badge">
+                    <span class="portal-stat-icon">🌾</span>
+                    <div>
+                        <div class="portal-stat-num">Nayagarh</div>
+                        <div class="portal-stat-lbl" data-en="Mandi Prices" data-or="ମଣ୍ଡି ଫସଲ ଦର">Mandi Prices</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Search Bar & Filter Chips -->
+            <div class="portal-filter-wrapper">
+                <div class="portal-search-box">
+                    <input type="text" id="portal-search-input" placeholder="Search portals (e.g., School, Hospital, Sarapanch, Mandi, Temples)...">
+                </div>
+                <div class="portal-chips-container">
+                    <button class="portal-chip-btn active" data-filter="all">All Portals</button>
+                    <button class="portal-chip-btn" data-filter="education">🏫 Education & Health</button>
+                    <button class="portal-chip-btn" data-filter="governance">🏛️ Governance</button>
+                    <button class="portal-chip-btn" data-filter="culture">🎭 Culture & Faith</button>
+                    <button class="portal-chip-btn" data-filter="agriculture">🌾 Agriculture</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Portal Sub-Webpage Directory Grid -->
+        <div class="portal-hub-grid" id="portal-hub-grid">
+            {% set group_map = {'school': 'education', 'medical': 'education', 'sarapanch': 'governance', 'president': 'governance', 'culture': 'culture', 'temples': 'culture', 'agriculture': 'agriculture'} %}
+            {% for item in category_data %}
+            <div class="portal-hub-card scroll-reveal" data-group="{{ group_map.get(item.cat.id, 'all') }}" data-keywords="{{ item.cat.title|lower }} {{ item.cat.description|lower }}">
+                <div>
+                    <div class="portal-hub-card-header">
+                        <div class="portal-hub-icon-box">
+                            <span>{{ item.icon }}</span>
+                        </div>
+                        <div>
+                            <h2>{{ item.cat.title }}</h2>
+                            <small style="color: var(--accent); font-weight: 600; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.5px;">Sankhei Community</small>
+                        </div>
+                    </div>
+
+                    <div class="portal-hub-meta">
+                        <span class="portal-meta-badge">📸 {{ item.img_count }} Photos</span>
+                        <span class="portal-meta-badge">📢 {{ item.event_count }} Updates</span>
+                    </div>
+
+                    <p class="portal-hub-desc">{{ item.cat.description }}</p>
+                </div>
+
+                <a href="{{ url_for('portal_category_detail', category_id=item.cat.id) }}" class="portal-explore-btn">
+                    <span>Explore {{ item.cat.title }} Portal</span> &rarr;
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+
+        {% if current_user.is_authenticated %}
+        <!-- Admin Management Control Center -->
+        <div style="margin-top: 4rem; padding-top: 3rem; border-top: 2px dashed rgba(212, 129, 53, 0.4);">
+            <div class="section-header center" style="margin-bottom: 2rem;">
+                <h2 style="color: var(--accent); font-size: 2.2rem;">⚙️ Executive Admin Control Center</h2>
+                <p>Logged in as <strong>{{ current_user.username }}</strong>. Manage site-wide homepage content, public announcements, messages, and map locations.</p>
+            </div>
+
+            <!-- Homepage Events & Slideshow Admin -->
+            <div class="admin-control-card" id="homepage_content" style="border-left: 5px solid var(--primary);">
+                <h2 style="color: var(--primary); font-size: 1.5rem; margin-bottom: 0.5rem;">Homepage Content Management</h2>
+                <p style="margin-bottom: 1.5rem; color: var(--text-muted);">Manage the scrolling events ticker and main image slideshow displayed on the home page.</p>
+                
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem;">
+                    <!-- Events Management -->
+                    <div style="background: var(--bg-light); padding: 1.5rem; border-radius: 16px;">
+                        <h3 style="font-size: 1.25rem; margin-bottom: 1rem; color: var(--primary);">Manage Homepage Ticker Events</h3>
+                        <ul style="list-style: none; padding: 0; margin-bottom: 1.5rem;">
+                            {% for event in events %}
+                            <li style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(0,0,0,0.08); padding: 0.6rem 0;">
+                                <span style="font-size: 0.95rem;"><strong>{{ event.tag }}</strong>: {{ event.description }}</span>
+                                <form action="{{ url_for('delete_event', event_id=event.id) }}" method="POST" style="margin: 0;" onsubmit="return confirm('Delete this event?');">
+                                    <button type="submit" style="background: #dc3545; color: white; border: none; padding: 0.3rem 0.6rem; border-radius: 6px; cursor: pointer; font-size: 0.8rem;">Delete</button>
+                                </form>
+                            </li>
+                            {% else %}
+                            <li style="color: var(--text-muted);">No events added yet.</li>
+                            {% endfor %}
+                        </ul>
+                        
+                        <strong>Add New Ticker Event:</strong>
+                        <form action="{{ url_for('add_event') }}" method="POST" style="display: flex; flex-direction: column; gap: 0.6rem; margin-top: 0.5rem;">
+                            <input type="text" name="tag" placeholder="Tag (e.g. Upcoming / Festival)" required style="padding: 0.6rem; border: 1px solid #ccc; border-radius: 8px;">
+                            <input type="text" name="description" placeholder="Event Description" required style="padding: 0.6rem; border: 1px solid #ccc; border-radius: 8px;">
+                            <button type="submit" class="cta-btn" style="border: none; padding: 0.6rem; cursor: pointer; font-size: 0.9rem;">Add Event</button>
+                        </form>
+                    </div>
+
+                    <!-- Slideshow Management -->
+                    <div style="background: var(--bg-light); padding: 1.5rem; border-radius: 16px;">
+                        <h3 style="font-size: 1.25rem; margin-bottom: 1rem; color: var(--primary);">Manage Slideshow Banners</h3>
+                        <div class="image-grid" style="grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
+                            {% for img in images %}
+                                {% if img.category == 'slideshow' %}
+                                <div class="image-card" style="height: 100px;">
+                                    <img src="{{ url_for('static', filename='uploads/' + img.filename) }}" alt="Slideshow Image">
+                                    <form action="{{ url_for('delete_image', image_id=img.id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Delete this slideshow image?');">
+                                        <button type="submit" class="delete-btn" title="Remove Image">&times;</button>
+                                    </form>
+                                </div>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+
+                        <strong>Upload New Slideshow Photo:</strong>
+                        <form action="{{ url_for('upload_image') }}" method="POST" enctype="multipart/form-data" style="display: flex; gap: 0.5rem; margin-top: 0.5rem;">
+                            <input type="hidden" name="category" value="slideshow">
+                            <input type="file" name="image" accept="image/*" required style="width: 100%;">
+                            <button type="submit" class="cta-btn" style="border: none; padding: 0.6rem 1.2rem; cursor: pointer; font-size: 0.9rem;">Upload</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Homepage Text Edit Admin -->
+            <div class="admin-control-card" id="homepage_static_content" style="border-left: 5px solid var(--accent);">
+                <h2 style="color: var(--accent); font-size: 1.5rem; margin-bottom: 0.5rem;">Homepage Text & Imagery</h2>
+                <p style="margin-bottom: 1.5rem; color: var(--text-muted);">Edit content displayed in the "The Essence of Our Village" section on the homepage.</p>
+                
+                <div style="background: var(--bg-light); padding: 1.5rem; border-radius: 16px;">
+                    <form action="{{ url_for('edit_site_content', content_id='home_about') }}" method="POST" enctype="multipart/form-data" style="display: flex; flex-direction: column; gap: 0.8rem;">
+                        <input type="text" name="title" placeholder="Title" value="{{ site_content['home_about'].title if site_content.get('home_about') else 'The Essence of Our Village' }}" required style="padding: 0.6rem; border: 1px solid #ccc; border-radius: 8px;">
+                        <textarea name="content" rows="5" required style="padding: 0.6rem; border: 1px solid #ccc; border-radius: 8px;">{{ site_content['home_about'].content if site_content.get('home_about') else '' }}</textarea>
+                        <div>
+                            <label style="display: block; font-size: 0.9rem; color: #555; margin-bottom: 0.3rem;">Replace Side Section Image (Optional):</label>
+                            <input type="file" name="image" accept="image/*">
+                        </div>
+                        <button type="submit" class="cta-btn" style="border: none; padding: 0.6rem 1.5rem; cursor: pointer; align-self: flex-start;">Save Changes</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Public Announcements Admin -->
+            <div class="admin-control-card" id="announcements_content" style="border-left: 5px solid #28a745;">
+                <h2 style="color: #28a745; font-size: 1.5rem; margin-bottom: 0.5rem;">Public Announcements</h2>
+                <p style="margin-bottom: 1.5rem; color: var(--text-muted);">Post official notices visible on the public Announcements board.</p>
+                
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem;">
+                    <div>
+                        <h3 style="font-size: 1.25rem; margin-bottom: 1rem;">Active Notices</h3>
+                        <ul style="list-style: none; padding: 0;">
+                            {% for ann in announcements %}
+                            <li style="border-bottom: 1px solid #ccc; padding: 1rem 0; position: relative;">
+                                <strong>{{ ann.title }}</strong><br>
+                                <small style="color: var(--text-muted);">{{ ann.date_posted.strftime('%B %d, %Y') }}</small>
+                                <form action="{{ url_for('delete_announcement', ann_id=ann.id) }}" method="POST" style="position: absolute; right: 0; top: 1rem;" onsubmit="return confirm('Delete this announcement?');">
+                                    <button type="submit" style="background: #dc3545; color: white; border: none; padding: 0.25rem 0.5rem; border-radius: 6px; cursor: pointer;">Delete</button>
+                                </form>
+                            </li>
+                            {% else %}
+                            <li style="color: var(--text-muted);">No announcements posted yet.</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    <div style="background: var(--bg-light); padding: 1.5rem; border-radius: 16px;">
+                        <h3 style="font-size: 1.25rem; margin-bottom: 1rem;">Post New Notice</h3>
+                        <form action="{{ url_for('add_announcement') }}" method="POST" style="display: flex; flex-direction: column; gap: 0.6rem;">
+                            <input type="text" name="title" placeholder="Notice Title" required style="padding: 0.6rem; border: 1px solid #ccc; border-radius: 8px;">
+                            <textarea name="content" rows="4" placeholder="Full announcement text..." required style="padding: 0.6rem; border: 1px solid #ccc; border-radius: 8px; resize: vertical;"></textarea>
+                            <button type="submit" class="cta-btn" style="border: none; padding: 0.6rem; cursor: pointer;">Publish Notice</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Inbox Messages Admin -->
+            <div class="admin-control-card" id="messages_content" style="border-left: 5px solid #17a2b8;">
+                <h2 style="color: #17a2b8; font-size: 1.5rem; margin-bottom: 0.5rem;">Citizen Inbox Messages</h2>
+                <p style="margin-bottom: 1.5rem; color: var(--text-muted);">Messages submitted through the Contact Form.</p>
+                
+                <div style="display: grid; grid-template-columns: 1fr; gap: 1rem;">
+                    {% for msg in messages %}
+                    <div style="background: var(--bg-light); padding: 1.5rem; border-radius: 12px; position: relative;">
+                        <strong style="font-size: 1.1rem; color: var(--text-dark);">{{ msg.name }}</strong> 
+                        <a href="mailto:{{ msg.email }}" style="color: var(--accent); margin-left: 0.5rem;">({{ msg.email }})</a>
+                        <small style="display: block; color: var(--text-muted); margin-bottom: 0.75rem;">Received: {{ msg.date_sent.strftime('%B %d, %Y at %I:%M %p') }}</small>
+                        <p style="white-space: pre-wrap; color: var(--text-dark); margin: 0;">{{ msg.message }}</p>
+                        
+                        <form action="{{ url_for('delete_message', msg_id=msg.id) }}" method="POST" style="position: absolute; right: 1.5rem; top: 1.5rem;" onsubmit="return confirm('Delete message?');">
+                            <button type="submit" style="background: #dc3545; color: white; border: none; padding: 0.3rem 0.6rem; border-radius: 6px; cursor: pointer; font-size: 0.8rem;">Delete</button>
+                        </form>
+                    </div>
+                    {% else %}
+                    <p style="color: var(--text-muted);">Inbox is empty.</p>
+                    {% endfor %}
+                </div>
+            </div>
+
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+<!-- Interactive Real-Time Filter & Search Script -->
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const searchInput = document.getElementById('portal-search-input');
+        const chipBtns = document.querySelectorAll('.portal-chip-btn');
+        const portalCards = document.querySelectorAll('.portal-hub-card');
+
+        let activeFilter = 'all';
+
+        function filterPortals() {
+            const query = searchInput ? searchInput.value.toLowerCase().trim() : '';
+
+            portalCards.forEach(card => {
+                const group = card.getAttribute('data-group');
+                const keywords = card.getAttribute('data-keywords') || '';
+
+                const matchesGroup = (activeFilter === 'all') || (group === activeFilter);
+                const matchesSearch = !query || keywords.includes(query);
+
+                if (matchesGroup && matchesSearch) {
+                    card.style.display = 'flex';
+                    card.style.opacity = '1';
+                } else {
+                    card.style.display = 'none';
+                    card.style.opacity = '0';
+                }
+            });
+        }
+
+        if (searchInput) {
+            searchInput.addEventListener('input', filterPortals);
+        }
+
+        chipBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                chipBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                activeFilter = btn.getAttribute('data-filter');
+                filterPortals();
+            });
+        });
+    });
+</script>
+{% endblock %}
