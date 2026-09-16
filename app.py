@@ -447,7 +447,7 @@ def edit_site_content(content_id):
     image_file = request.files.get('image')
 
     if new_title:
-        content.title = new_title
+        content.title = new_title.replace('<br>', ' ').replace('&lt;br&gt;', ' ').replace('<br/>', ' ').strip()
     if new_content:
         content.content = new_content
         
@@ -613,6 +613,11 @@ def init_db():
                 description='Request to install solar street lights along the canal road for night safety.',
                 status='Under Review'
             ))
+
+        # Clean up any lingering <br> or &lt;br&gt; tags in SiteContent
+        about_item = SiteContent.query.get('home_about')
+        if about_item and ('<br>' in about_item.title or '&lt;br&gt;' in about_item.title or '<br/>' in about_item.title):
+            about_item.title = about_item.title.replace('<br>', ' ').replace('&lt;br&gt;', ' ').replace('<br/>', ' ').strip()
 
         db.session.commit()
 

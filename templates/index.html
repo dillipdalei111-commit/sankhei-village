@@ -146,7 +146,7 @@
         <div class="container">
             <div class="about-grid">
                 <div class="about-text scroll-reveal">
-                    <h2>{{ site_content['home_about'].title|replace('\n', '<br>')|safe if site_content.get('home_about') else 'The Essence of <br>Our Village' }}</h2>
+                    <h2 data-en="{{ (site_content['home_about'].title|replace('<br>', ' ')|replace('&lt;br&gt;', ' ')|replace('<br/>', ' ')|replace('\n', ' ')).strip() if site_content.get('home_about') else 'The Essence of Our Village' }}" data-or="ଆମ ଗ୍ରାମର ପରିଚୟ">{{ (site_content['home_about'].title|replace('<br>', ' ')|replace('&lt;br&gt;', ' ')|replace('<br/>', ' ')|replace('\n', ' ')).strip() if site_content.get('home_about') else 'The Essence of Our Village' }}</h2>
                     {% if site_content.get('home_about') %}
                         {% for paragraph in site_content['home_about'].content.split('\n\n') %}
                             <p>{{ paragraph }}</p>
