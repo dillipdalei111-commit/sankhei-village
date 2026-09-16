@@ -20,6 +20,7 @@
         /* Extra styles for portal layout */
         body { padding-top: 100px; background-color: var(--bg-light); color: var(--text-dark); }
         .navbar.scrolled, .navbar { background: rgba(18, 26, 22, 0.95); }
+        body.light-theme .navbar.scrolled, body.light-theme .navbar { background: rgba(255, 255, 255, 0.95); }
         .flash-messages { max-width: 800px; margin: 0 auto 2rem; }
         .flash { padding: 1rem; border-radius: 8px; margin-bottom: 1rem; }
         .flash.success { background: #d4edda; color: #155724; }
@@ -50,20 +51,20 @@
     <nav class="navbar scrolled">
         <div class="nav-container">
             <a href="{{ url_for('index') }}" class="logo">Sankhei<span>.</span></a>
-            <div class="nav-right-controls" style="display: flex; align-items: center; gap: 1rem;">
+            <div class="nav-right-controls">
                 <!-- Weather Widget -->
-                <div id="weather-widget" style="color: #fff; font-size: 0.85rem; display: flex; align-items: center; gap: 0.4rem; background: rgba(255,255,255,0.1); padding: 0.25rem 0.75rem; border-radius: 20px;">
-                    <span id="weather-icon">☁️</span>
-                    <span id="weather-temp">--°C</span>
+                <div id="weather-widget" class="nav-weather-badge">
+                    <span id="weather-icon" class="weather-icon">☁️</span>
+                    <span id="weather-temp" class="weather-temp">--°C</span>
                 </div>
                 <!-- Live Clock Widget -->
-                <div id="clock-widget" title="Local Time in Sankhei (IST)">
+                <div id="clock-widget" class="nav-clock-badge" title="Local Time in Sankhei (IST)">
                     <span>🕒</span>
-                    <span id="clock-time">00:00:00</span>
+                    <span id="clock-time" class="clock-time">00:00:00</span>
                 </div>
                 <!-- Language Switcher -->
                 <button id="lang-toggle" class="lang-toggle-btn" title="Toggle Language (EN / ଓଡ଼ିଆ)">
-                    🌐 <span id="lang-label">EN</span>
+                    🌐 <span id="lang-label" class="lang-label">EN</span>
                 </button>
                 <!-- Ambient Sound Player -->
                 <button id="ambient-audio-btn" class="audio-btn" title="Play Peaceful Ambient Village Music">
@@ -73,13 +74,35 @@
                 <button id="theme-toggle" class="theme-btn" title="Toggle Theme">
                     🌙
                 </button>
-                <div class="menu-icon" id="menu-icon">
+                <!-- Hamburger Menu Icon -->
+                <button class="menu-icon" id="menu-icon" aria-label="Toggle navigation menu" title="Menu" type="button">
                     <div class="bar1"></div>
                     <div class="bar2"></div>
                     <div class="bar3"></div>
-                </div>
+                </button>
             </div>
+
+            <!-- Mobile Menu Backdrop -->
+            <div class="nav-backdrop" id="nav-backdrop"></div>
+
             <ul class="nav-links" id="nav-links">
+                <li class="mobile-drawer-header">
+                    <div class="drawer-brand">
+                        <span class="logo">Sankhei<span>.</span></span>
+                        <small class="drawer-tagline">Nayagarh, Odisha</small>
+                    </div>
+                    <button type="button" class="drawer-close-btn" id="drawer-close-btn" aria-label="Close menu">&times;</button>
+                </li>
+                <li class="mobile-drawer-info">
+                    <div class="drawer-badge">
+                        <span class="weather-icon">☁️</span>
+                        <span class="weather-temp">--°C</span>
+                    </div>
+                    <div class="drawer-badge">
+                        <span>🕒</span>
+                        <span class="clock-time">00:00:00</span>
+                    </div>
+                </li>
                 <li><a href="{{ url_for('index') }}" data-en="Home" data-or="ମୁଖ୍ୟ ପୃଷ୍ଠା">Home</a></li>
                 <li><a href="{{ url_for('history') }}" data-en="History" data-or="ଇତିହାସ">History</a></li>
                 <li><a href="{{ url_for('announcements') }}" data-en="Announcements" data-or="ବିଜ୍ଞପ୍ତି">Announcements</a></li>

@@ -35,10 +35,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // 3. Weather Widget Logic (With 1.5s Fast Timeout)
-    const weatherTemp = document.getElementById('weather-temp');
-    const weatherIcon = document.getElementById('weather-icon');
+    const weatherTempEls = document.querySelectorAll('.weather-temp, #weather-temp');
+    const weatherIconEls = document.querySelectorAll('.weather-icon, #weather-icon');
     
-    if (weatherTemp && weatherIcon) {
+    if (weatherTempEls.length > 0 && weatherIconEls.length > 0) {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 1500); // 1.5s fast timeout
 
@@ -48,21 +48,23 @@ document.addEventListener('DOMContentLoaded', () => {
                 clearTimeout(timeoutId);
                 const temp = Math.round(data.current_weather.temperature);
                 const code = data.current_weather.weathercode;
-                weatherTemp.textContent = `${temp}°C`;
+                let icon = '☁️';
                 
                 // Set icon based on WMO weather code
-                if (code === 0) weatherIcon.textContent = '☀️';
-                else if (code >= 1 && code <= 3) weatherIcon.textContent = '⛅';
-                else if (code >= 45 && code <= 48) weatherIcon.textContent = '🌫️';
-                else if (code >= 51 && code <= 67) weatherIcon.textContent = '🌧️';
-                else if (code >= 71 && code <= 77) weatherIcon.textContent = '❄️';
-                else if (code >= 80 && code <= 82) weatherIcon.textContent = '🌦️';
-                else if (code >= 95 && code <= 99) weatherIcon.textContent = '⛈️';
-                else weatherIcon.textContent = '☁️';
+                if (code === 0) icon = '☀️';
+                else if (code >= 1 && code <= 3) icon = '⛅';
+                else if (code >= 45 && code <= 48) icon = '🌫️';
+                else if (code >= 51 && code <= 67) icon = '🌧️';
+                else if (code >= 71 && code <= 77) icon = '❄️';
+                else if (code >= 80 && code <= 82) icon = '🌦️';
+                else if (code >= 95 && code <= 99) icon = '⛈️';
+
+                weatherTempEls.forEach(el => { el.textContent = `${temp}°C`; });
+                weatherIconEls.forEach(el => { el.textContent = icon; });
             })
             .catch(err => {
-                weatherTemp.textContent = '28°C';
-                weatherIcon.textContent = '☀️';
+                weatherTempEls.forEach(el => { el.textContent = '28°C'; });
+                weatherIconEls.forEach(el => { el.textContent = '☀️'; });
             });
     }
 
@@ -77,27 +79,80 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Mobile Menu Toggle
+    // Mobile Menu & Off-canvas Drawer Logic
     const menuIcon = document.getElementById('menu-icon');
     const navLinks = document.getElementById('nav-links');
-    const navItems = document.querySelectorAll('.nav-links li a');
+    const navBackdrop = document.getElementById('nav-backdrop');
+    const drawerCloseBtn = document.getElementById('drawer-close-btn');
 
-    if (menuIcon && navLinks) {
-        menuIcon.addEventListener('click', () => {
-            navLinks.classList.toggle('active');
-            menuIcon.classList.toggle('toggle');
+    function openMobileMenu() {
+        if (navLinks) navLinks.classList.add('active');
+        if (menuIcon) {
+            menuIcon.classList.add('toggle');
+            menuIcon.setAttribute('aria-expanded', 'true');
+        }
+        if (navBackdrop) navBackdrop.classList.add('active');
+        document.body.classList.add('menu-open');
+    }
+
+    function closeMobileMenu() {
+        if (navLinks) navLinks.classList.remove('active');
+        if (menuIcon) {
+            menuIcon.classList.remove('toggle');
+            menuIcon.setAttribute('aria-expanded', 'false');
+        }
+        if (navBackdrop) navBackdrop.classList.remove('active');
+        document.body.classList.remove('menu-open');
+    }
+
+    function toggleMobileMenu() {
+        if (navLinks && navLinks.classList.contains('active')) {
+            closeMobileMenu();
+        } else {
+            openMobileMenu();
+        }
+    }
+
+    if (menuIcon) {
+        menuIcon.addEventListener('click', (e) => {
+            e.stopPropagation();
+            toggleMobileMenu();
         });
     }
 
-    // Close mobile menu when a link is clicked
-    navItems.forEach(item => {
+    if (drawerCloseBtn) {
+        drawerCloseBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            closeMobileMenu();
+        });
+    }
+
+    if (navBackdrop) {
+        navBackdrop.addEventListener('click', closeMobileMenu);
+    }
+
+    // Close mobile menu when an anchor link is clicked
+    document.querySelectorAll('.nav-links a').forEach(item => {
         item.addEventListener('click', () => {
-            if (navLinks && menuIcon && navLinks.classList.contains('active')) {
-            navLinks.classList.remove('active');
-            menuIcon.classList.remove('toggle');
+            if (window.innerWidth <= 1024) {
+                closeMobileMenu();
+            }
+        });
+    });
+
+    // Close mobile menu on Escape key
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && navLinks && navLinks.classList.contains('active')) {
+            closeMobileMenu();
         }
     });
-});
+
+    // Auto close drawer when resizing to desktop
+    window.addEventListener('resize', () => {
+        if (window.innerWidth > 1024 && navLinks && navLinks.classList.contains('active')) {
+            closeMobileMenu();
+        }
+    });
 
     // Scroll Reveal Animation (Intersection Observer)
     const revealElements = document.querySelectorAll('.scroll-reveal');
@@ -213,28 +268,31 @@ document.addEventListener('DOMContentLoaded', () => {
         startInterval(id);
     }
     // 4. Live IST Clock Logic
-    const clockTime = document.getElementById('clock-time');
+    const clockTimeEls = document.querySelectorAll('.clock-time, #clock-time');
     function updateClock() {
-        if (!clockTime) return;
+        if (clockTimeEls.length === 0) return;
         const now = new Date();
         // Format as Indian Standard Time (IST)
         const options = { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true };
-        clockTime.textContent = now.toLocaleTimeString('en-IN', options);
+        const timeStr = now.toLocaleTimeString('en-IN', options);
+        clockTimeEls.forEach(el => { el.textContent = timeStr; });
     }
-    if (clockTime) {
+    if (clockTimeEls.length > 0) {
         updateClock();
         setInterval(updateClock, 1000);
     }
 
     // 5. Language Switcher Logic (English / Odia - ଓଡ଼ିଆ)
-    const langToggleBtn = document.getElementById('lang-toggle');
-    const langLabel = document.getElementById('lang-label');
+    const langToggleBtns = document.querySelectorAll('.lang-toggle-btn, #lang-toggle');
+    const langLabels = document.querySelectorAll('.lang-label, #lang-label');
     let currentLang = localStorage.getItem('sankhei_lang') || 'en';
 
     function setLanguage(lang) {
         currentLang = lang;
         localStorage.setItem('sankhei_lang', lang);
-        if (langLabel) langLabel.textContent = lang === 'or' ? 'ଓଡ଼ିଆ' : 'EN';
+        langLabels.forEach(el => {
+            el.textContent = lang === 'or' ? 'ଓଡ଼ିଆ' : 'EN';
+        });
         
         document.querySelectorAll('[data-en][data-or]').forEach(el => {
             const text = el.getAttribute(`data-${lang}`);
@@ -248,13 +306,13 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    if (langToggleBtn) {
-        setLanguage(currentLang);
-        langToggleBtn.addEventListener('click', () => {
+    setLanguage(currentLang);
+    langToggleBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
             const nextLang = currentLang === 'en' ? 'or' : 'en';
             setLanguage(nextLang);
         });
-    }
+    });
 
     // 6. Lightbox Modal Logic
     const lightboxModal = document.getElementById('lightbox-modal');

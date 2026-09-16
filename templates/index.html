@@ -37,38 +37,64 @@
     <!-- Navbar -->
     <nav class="navbar">
         <div class="nav-container">
-            <a href="#" class="logo">Sankhei<span>.</span></a>
-            <div class="nav-right-controls" style="display: flex; align-items: center; gap: 1rem;">
+            <a href="{{ url_for('index') }}" class="logo">Sankhei<span>.</span></a>
+            <div class="nav-right-controls">
                 <!-- Weather Widget -->
-                <div id="weather-widget" style="color: #fff; font-size: 0.85rem; display: flex; align-items: center; gap: 0.4rem; background: rgba(255,255,255,0.1); padding: 0.25rem 0.75rem; border-radius: 20px;">
-                    <span id="weather-icon">☁️</span>
-                    <span id="weather-temp">--°C</span>
+                <div id="weather-widget" class="nav-weather-badge">
+                    <span id="weather-icon" class="weather-icon">☁️</span>
+                    <span id="weather-temp" class="weather-temp">--°C</span>
                 </div>
                 <!-- Live Clock Widget -->
-                <div id="clock-widget" title="Local Time in Sankhei (IST)">
+                <div id="clock-widget" class="nav-clock-badge" title="Local Time in Sankhei (IST)">
                     <span>🕒</span>
-                    <span id="clock-time">00:00:00</span>
+                    <span id="clock-time" class="clock-time">00:00:00</span>
                 </div>
                 <!-- Language Switcher -->
                 <button id="lang-toggle" class="lang-toggle-btn" title="Toggle Language (EN / ଓଡ଼ିଆ)">
-                    🌐 <span id="lang-label">EN</span>
+                    🌐 <span id="lang-label" class="lang-label">EN</span>
                 </button>
                 <!-- Theme Toggle -->
                 <button id="theme-toggle" class="theme-btn" title="Toggle Theme">
                     🌙
                 </button>
-                <div class="menu-icon" id="menu-icon">
+                <!-- Hamburger Menu Icon -->
+                <button class="menu-icon" id="menu-icon" aria-label="Toggle navigation menu" title="Menu" type="button">
                     <div class="bar1"></div>
                     <div class="bar2"></div>
                     <div class="bar3"></div>
-                </div>
+                </button>
             </div>
+
+            <!-- Mobile Menu Backdrop -->
+            <div class="nav-backdrop" id="nav-backdrop"></div>
+
             <ul class="nav-links" id="nav-links">
+                <li class="mobile-drawer-header">
+                    <div class="drawer-brand">
+                        <span class="logo">Sankhei<span>.</span></span>
+                        <small class="drawer-tagline">Nayagarh, Odisha</small>
+                    </div>
+                    <button type="button" class="drawer-close-btn" id="drawer-close-btn" aria-label="Close menu">&times;</button>
+                </li>
+                <li class="mobile-drawer-info">
+                    <div class="drawer-badge">
+                        <span class="weather-icon">☁️</span>
+                        <span class="weather-temp">--°C</span>
+                    </div>
+                    <div class="drawer-badge">
+                        <span>🕒</span>
+                        <span class="clock-time">00:00:00</span>
+                    </div>
+                </li>
                 <li><a href="{{ url_for('index') }}#home" data-en="Home" data-or="ମୁଖ୍ୟ ପୃଷ୍ଠା">Home</a></li>
                 <li><a href="{{ url_for('index') }}#about" data-en="About" data-or="ବିଷୟରେ">About</a></li>
                 <li><a href="{{ url_for('index') }}#culture" data-en="Culture" data-or="ସଂସ୍କୃତି">Culture</a></li>
                 <li><a href="{{ url_for('index') }}#gallery" data-en="Gallery" data-or="ଗ୍ୟାଲେରୀ">Gallery</a></li>
+                <li><a href="{{ url_for('history') }}" data-en="History" data-or="ଇତିହାସ">History</a></li>
+                <li><a href="{{ url_for('announcements') }}" data-en="Announcements" data-or="ବିଜ୍ଞପ୍ତି">Announcements</a></li>
+                <li><a href="{{ url_for('map_page') }}" data-en="Map" data-or="ମାନଚିତ୍ର">Map</a></li>
                 <li><a href="{{ url_for('portal') }}" data-en="Portal" data-or="ପୋର୍ଟାଲ୍">Portal</a></li>
+                <li><a href="{{ url_for('contact') }}" data-en="Contact" data-or="ଯୋଗାଯୋଗ">Contact</a></li>
             </ul>
         </div>
     </nav>
