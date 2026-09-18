@@ -575,12 +575,7 @@ body.light-theme .ticker-wrapper {
     list-style: none;
     padding: 0;
     margin: 0;
-    animation: scroll-up 18s linear infinite;
-}
-
-.ticker-content.ticker-static {
-    animation: none !important;
-    transform: none !important;
+    animation: scroll-up 14s linear infinite;
 }
 
 .ticker-wrapper:hover .ticker-content {
@@ -588,8 +583,8 @@ body.light-theme .ticker-wrapper {
 }
 
 @keyframes scroll-up {
-    0% { transform: translateY(0%); }
-    100% { transform: translateY(-50%); }
+    0% { transform: translateY(100%); }
+    100% { transform: translateY(-100%); }
 }
 
 .ticker-content li {
