@@ -12,7 +12,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
     
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}?v=2.1">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}?v=2.2">
 </head>
 <body>
     <!-- Full Screen Loader -->
@@ -283,12 +283,17 @@
                         <p style="font-size: 1rem;">Stay updated with Sankhei</p>
                     </div>
                     <div class="ticker-wrapper">
-                        <ul class="ticker-content">
+                        <ul class="ticker-content {% if events|length <= 3 %}ticker-static{% endif %}">
                             {% for event in events %}
                             <li><span class="date">{{ event.tag }}</span> {{ event.description }}</li>
                             {% else %}
                             <li><span class="date">Notice</span> No upcoming events at this moment.</li>
                             {% endfor %}
+                            {% if events|length > 3 %}
+                            {% for event in events %}
+                            <li aria-hidden="true"><span class="date">{{ event.tag }}</span> {{ event.description }}</li>
+                            {% endfor %}
+                            {% endif %}
                         </ul>
                     </div>
                 </div>
@@ -407,7 +412,7 @@
     </footer>
 
     <!-- Scripts -->
-    <script src="{{ url_for('static', filename='js/script.js') }}?v=2.1"></script>
+    <script src="{{ url_for('static', filename='js/script.js') }}?v=2.2"></script>
 </body>
 </html>
 

@@ -554,20 +554,33 @@ body.menu-open {
 
 /* Events Ticker */
 .ticker-wrapper {
+    max-height: 400px;
+    min-height: 250px;
     height: 400px;
     overflow: hidden;
     position: relative;
     background: #fff;
-    border-radius: 12px;
+    border-radius: 16px;
     padding: 1.5rem;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.06);
+    border: 1px solid rgba(0,0,0,0.06);
+}
+
+body.light-theme .ticker-wrapper {
+    background: #fff;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.06);
 }
 
 .ticker-content {
     list-style: none;
     padding: 0;
     margin: 0;
-    animation: scroll-up 15s linear infinite;
+    animation: scroll-up 18s linear infinite;
+}
+
+.ticker-content.ticker-static {
+    animation: none !important;
+    transform: none !important;
 }
 
 .ticker-wrapper:hover .ticker-content {
@@ -575,25 +588,34 @@ body.menu-open {
 }
 
 @keyframes scroll-up {
-    0% { transform: translateY(100%); }
-    100% { transform: translateY(-100%); }
+    0% { transform: translateY(0%); }
+    100% { transform: translateY(-50%); }
 }
 
 .ticker-content li {
-    margin-bottom: 1.5rem;
+    margin-bottom: 1.25rem;
     padding-bottom: 1rem;
-    border-bottom: 1px solid rgba(0,0,0,0.1);
+    border-bottom: 1px solid rgba(0,0,0,0.08);
     color: var(--text-dark);
+    line-height: 1.5;
+    font-size: 0.98rem;
+}
+
+.ticker-content li:last-child {
+    border-bottom: none;
 }
 
 .ticker-content .date {
-    display: block;
+    display: inline-block;
+    background: rgba(212, 129, 53, 0.15);
     color: var(--accent);
     font-weight: 700;
-    margin-bottom: 0.25rem;
-    font-size: 0.875rem;
+    margin-bottom: 0.4rem;
+    font-size: 0.8rem;
     text-transform: uppercase;
     letter-spacing: 1px;
+    padding: 0.2rem 0.55rem;
+    border-radius: 6px;
 }
 
 /* Slideshow */
@@ -917,16 +939,18 @@ body.light-theme .nav-clock-badge {
 
 /* Hero Split Dual Map Showcase */
 .hero-split {
+    height: auto !important;
     min-height: 100vh;
-    padding-top: 120px;
-    padding-bottom: 60px;
+    min-height: 100dvh;
+    padding-top: 140px; /* Safe, generous clearance below fixed navigation bar */
+    padding-bottom: 70px;
     position: relative;
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: flex-start; /* Ensures content flows downwards and never clips under navbar */
     align-items: center;
     background: radial-gradient(circle at center, #1B2E24 0%, #0D1410 100%);
-    overflow: hidden;
+    overflow: visible;
 }
 .hero-bg-container {
     position: absolute;
@@ -941,8 +965,21 @@ body.light-theme .nav-clock-badge {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 2.5rem;
+    gap: 2rem;
     width: 100%;
+}
+.hero-split .scroll-indicator {
+    position: relative;
+    bottom: auto;
+    left: auto;
+    transform: none;
+    margin-top: 2rem;
+    animation: bounce-flow 2s infinite;
+}
+@keyframes bounce-flow {
+    0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+    40% { transform: translateY(-8px); }
+    60% { transform: translateY(-4px); }
 }
 .hero-maps-grid {
     display: grid;
@@ -1023,6 +1060,9 @@ body.light-theme .nav-clock-badge {
 
 /* Laptops & Medium Screens (1025px - 1250px) */
 @media screen and (min-width: 1025px) and (max-width: 1250px) {
+    .hero-split {
+        padding-top: 130px;
+    }
     .nav-links {
         gap: 1rem;
     }
@@ -1037,6 +1077,9 @@ body.light-theme .nav-clock-badge {
 
 /* Tablets & Below (<= 1024px) - Enable Mobile Navigation Drawer */
 @media screen and (max-width: 1024px) {
+    .hero-split {
+        padding-top: 120px;
+    }
     .navbar {
         padding: 0.85rem 0;
     }
@@ -1321,8 +1364,30 @@ body.light-theme .nav-clock-badge {
         padding: 6px;
     }
 
+    /* Mobile Hero Layout: generous clearance under menu bar */
+    .hero-split {
+        padding-top: 110px !important;
+        padding-bottom: 50px;
+    }
+
     .hero-content h1 {
-        font-size: 3rem;
+        font-size: clamp(2.2rem, 6.5vw, 3rem);
+        margin-bottom: 0.85rem;
+    }
+
+    .subtitle {
+        font-size: 1.05rem;
+        letter-spacing: 3px;
+        margin-bottom: 0.5rem;
+    }
+
+    .description {
+        font-size: 1.05rem;
+        margin-bottom: 1.75rem;
+    }
+
+    .hero-split .scroll-indicator {
+        display: none;
     }
     
     .about-grid {
@@ -1353,14 +1418,22 @@ body.light-theme .nav-clock-badge {
 
 /* Small Phones (<= 480px) */
 @media screen and (max-width: 480px) {
+    .hero-split {
+        padding-top: 100px !important;
+        padding-bottom: 40px;
+    }
     .hero-content h1 {
-        font-size: 2.5rem;
+        font-size: clamp(1.85rem, 7.5vw, 2.35rem);
+        margin-bottom: 0.75rem;
     }
     .subtitle {
-        font-size: 1rem;
+        font-size: 0.95rem;
+        letter-spacing: 2px;
+        margin-bottom: 0.4rem;
     }
     .description {
-        font-size: 1rem;
+        font-size: 0.95rem;
+        margin-bottom: 1.5rem;
     }
     .section {
         padding: 4rem 0;
@@ -1373,6 +1446,9 @@ body.light-theme .nav-clock-badge {
 
 /* Extra Small Phones (<= 380px) */
 @media screen and (max-width: 380px) {
+    .hero-split {
+        padding-top: 95px !important;
+    }
     .nav-container {
         padding: 0 0.65rem;
     }

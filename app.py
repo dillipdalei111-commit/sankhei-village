@@ -313,10 +313,27 @@ def add_event():
     description = request.form.get('description')
     
     if tag and description:
-        new_event = Event(tag=tag, description=description)
+        new_event = Event(tag=tag.strip(), description=description.strip())
         db.session.add(new_event)
         db.session.commit()
         flash('Event added successfully.', 'success')
+    else:
+        flash('Event tag and description cannot be empty.', 'error')
+        
+    return redirect(url_for('portal') + '#homepage_content')
+
+@app.route('/edit_event/<int:event_id>', methods=['POST'])
+@login_required
+def edit_event(event_id):
+    event = Event.query.get_or_404(event_id)
+    tag = request.form.get('tag')
+    description = request.form.get('description')
+    
+    if tag and description:
+        event.tag = tag.strip()
+        event.description = description.strip()
+        db.session.commit()
+        flash('Event updated successfully.', 'success')
     else:
         flash('Event tag and description cannot be empty.', 'error')
         
@@ -330,6 +347,24 @@ def delete_event(event_id):
     db.session.commit()
     flash('Event deleted successfully.', 'success')
     return redirect(url_for('portal') + '#homepage_content')
+
+@app.route('/edit_portal_event/<int:event_id>', methods=['POST'])
+@login_required
+def edit_portal_event(event_id):
+    event = PortalEvent.query.get_or_404(event_id)
+    category_id = event.category_id
+    tag = request.form.get('tag')
+    description = request.form.get('description')
+    
+    if tag and description:
+        event.tag = tag.strip()
+        event.description = description.strip()
+        db.session.commit()
+        flash(f'Event in {category_id} updated successfully.', 'success')
+    else:
+        flash('Event details cannot be empty.', 'error')
+        
+    return redirect(url_for('portal') + f'#{category_id}')
 
 @app.route('/add_portal_event', methods=['POST'])
 @login_required
@@ -613,6 +648,16 @@ def init_db():
                 description='Request to install solar street lights along the canal road for night safety.',
                 status='Under Review'
             ))
+
+        # Seed default Homepage Ticker events if empty
+        if not Event.query.first():
+            default_events = [
+                ('Festival', 'Grand Danda Yatra celebrations approaching in April 2027'),
+                ('Notice', 'Gram Sabha meeting organized at Panchayat Office to discuss village development'),
+                ('Development', 'Revenue Inspector (RI) office setup is currently in progress near the village entrance')
+            ]
+            for tag_val, desc_val in default_events:
+                db.session.add(Event(tag=tag_val, description=desc_val))
 
         # Clean up any lingering <br> or &lt;br&gt; tags in SiteContent
         about_item = SiteContent.query.get('home_about')
