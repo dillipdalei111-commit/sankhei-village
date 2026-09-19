@@ -228,43 +228,54 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function showSlide(id, index) {
         const data = slidersData[id];
-        if (!data) return;
+        if (!data || !data.slides || data.slides.length === 0) return;
 
         if (index >= data.slides.length) data.index = 0;
-        if (index < 0) data.index = data.slides.length - 1;
+        else if (index < 0) data.index = data.slides.length - 1;
+        else data.index = index;
 
-        data.slides.forEach(slide => slide.classList.remove('active'));
-        data.dots.forEach(dot => dot.classList.remove('active'));
-
-        if(data.slides[data.index]) data.slides[data.index].classList.add('active');
-        if(data.dots[data.index]) data.dots[data.index].classList.add('active');
+        data.slides.forEach((slide, idx) => {
+            if (idx === data.index) {
+                slide.classList.add('active');
+            } else {
+                slide.classList.remove('active');
+            }
+        });
+        data.dots.forEach((dot, idx) => {
+            if (idx === data.index) {
+                dot.classList.add('active');
+            } else {
+                dot.classList.remove('active');
+            }
+        });
     }
 
     window.moveSlide = function(id, n) {
-        if (!slidersData[id]) return;
-        slidersData[id].index += n;
-        showSlide(id, slidersData[id].index);
+        const data = slidersData[id];
+        if (!data) return;
+        showSlide(id, data.index + n);
         resetInterval(id);
     };
 
     window.currentSlide = function(id, n) {
-        if (!slidersData[id]) return;
-        slidersData[id].index = n;
-        showSlide(id, slidersData[id].index);
+        const data = slidersData[id];
+        if (!data) return;
+        showSlide(id, n);
         resetInterval(id);
     };
 
     function startInterval(id) {
-        if (!slidersData[id]) return;
-        slidersData[id].interval = setInterval(() => {
-            slidersData[id].index++;
-            showSlide(id, slidersData[id].index);
-        }, 3000);
+        const data = slidersData[id];
+        if (!data || data.slides.length <= 1) return;
+        data.interval = setInterval(() => {
+            showSlide(id, data.index + 1);
+        }, 4000);
     }
 
     function resetInterval(id) {
-        if (!slidersData[id]) return;
-        clearInterval(slidersData[id].interval);
+        const data = slidersData[id];
+        if (!data) return;
+        if (data.interval) clearInterval(data.interval);
         startInterval(id);
     }
     // 4. Live IST Clock Logic

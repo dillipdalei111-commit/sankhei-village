@@ -164,7 +164,7 @@
                     </div>
                 </div>
                 <div class="about-image scroll-reveal delay">
-                    <img src="{{ url_for('static', filename='uploads/' + site_content['home_about'].image_filename if site_content.get('home_about') and site_content['home_about'].image_filename else 'images/village_temple_1788245881477.png') }}" alt="Village About Image" loading="lazy">
+                    <img src="{{ image_url(site_content['home_about'].image_filename if site_content.get('home_about') and site_content['home_about'].image_filename else 'village_temple_1788245881477.png') }}" alt="Village About Image" loading="lazy">
                 </div>
             </div>
         </div>
@@ -252,7 +252,7 @@
             </div>
             <div class="culture-grid">
                 <div class="culture-image scroll-reveal">
-                    <img src="{{ url_for('static', filename='uploads/' + site_content['home_culture_1'].image_filename if site_content.get('home_culture_1') and site_content['home_culture_1'].image_filename else 'images/village_culture_1788245901170.png') }}" alt="Village Festival" loading="lazy">
+                    <img src="{{ image_url(site_content['home_culture_1'].image_filename if site_content.get('home_culture_1') and site_content['home_culture_1'].image_filename else 'village_culture_1788245901170.png') }}" alt="Village Festival" loading="lazy">
                 </div>
                 <div class="culture-content scroll-reveal delay">
                     <div class="culture-item">
@@ -303,24 +303,27 @@
                         <div class="slides">
                             {% for img in slideshow_images %}
                             <div class="slide {% if loop.first %}active{% endif %}">
-                                <img src="{{ url_for('static', filename='uploads/' + img.filename) }}" alt="Slideshow Image">
+                                <img src="{{ image_url(img.filename) }}" alt="{{ img.title or 'Slideshow Image' }}">
+                                {% if img.title %}
+                                <div class="slide-caption">{{ img.title }}</div>
+                                {% endif %}
                             </div>
                             {% else %}
                             <div class="slide active">
-                                <img src="{{ url_for('static', filename='images/hero_village_1788245846872.png') }}" alt="Default Slide">
+                                <img src="{{ image_url('hero_village_1788245846872.png') }}" alt="Default Slide">
                                 <div class="slide-caption">Serene Dawn over Paddy Fields</div>
                             </div>
                             {% endfor %}
                         </div>
+                        {% if slideshow_images|length > 1 %}
                         <button class="slider-btn prev" onclick="moveSlide('village-slider', -1)">&#10094;</button>
                         <button class="slider-btn next" onclick="moveSlide('village-slider', 1)">&#10095;</button>
                         <div class="slider-dots">
                             {% for img in slideshow_images %}
                             <span class="dot {% if loop.first %}active{% endif %}" onclick="currentSlide('village-slider', {{ loop.index0 }})"></span>
-                            {% else %}
-                            <span class="dot active" onclick="currentSlide('village-slider', 0)"></span>
                             {% endfor %}
                         </div>
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -335,24 +338,33 @@
                 <p>Experience the visual poetry of our village.</p>
             </div>
             <div class="gallery-grid">
+                {% for img in gallery_images %}
+                <div class="gallery-item scroll-reveal delay-{{ loop.index0 % 3 }} lightbox-trigger" data-caption="{{ img.title or 'Glimpses of Sankhei' }}">
+                    <img src="{{ image_url(img.filename) }}" alt="{{ img.title or 'Sankhei Photo' }}" loading="lazy">
+                    <div class="gallery-overlay">
+                        <span>{{ img.title or 'Sankhei' }}</span>
+                    </div>
+                </div>
+                {% else %}
                 <div class="gallery-item scroll-reveal lightbox-trigger" data-caption="Serene Dawn over Sankhei Landscape">
-                    <img src="{{ url_for('static', filename='images/hero_village_1788245846872.png') }}" alt="Sankhei Landscape" loading="lazy">
+                    <img src="{{ image_url('hero_village_1788245846872.png') }}" alt="Sankhei Landscape" loading="lazy">
                     <div class="gallery-overlay">
                         <span>Serene Dawn</span>
                     </div>
                 </div>
                 <div class="gallery-item scroll-reveal delay-1 lightbox-trigger" data-caption="Ancient Echoes of Baba Kapileswar Shiv Temple">
-                    <img src="{{ url_for('static', filename='images/village_temple_1788245881477.png') }}" alt="Temple" loading="lazy">
+                    <img src="{{ image_url('village_temple_1788245881477.png') }}" alt="Temple" loading="lazy">
                     <div class="gallery-overlay">
                         <span>Ancient Echoes</span>
                     </div>
                 </div>
                 <div class="gallery-item scroll-reveal delay-2 lightbox-trigger" data-caption="Joyous Celebrations & Vibrant Odia Culture">
-                    <img src="{{ url_for('static', filename='images/village_culture_1788245901170.png') }}" alt="Festival" loading="lazy">
+                    <img src="{{ image_url('village_culture_1788245901170.png') }}" alt="Festival" loading="lazy">
                     <div class="gallery-overlay">
                         <span>Joyous Celebrations</span>
                     </div>
                 </div>
+                {% endfor %}
             </div>
         </div>
     </section>

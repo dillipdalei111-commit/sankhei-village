@@ -34,6 +34,8 @@ class Image(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     filename = db.Column(db.String(255), nullable=False)
     category = db.Column(db.String(50), nullable=False) 
+    title = db.Column(db.String(200), nullable=True)
+    date_uploaded = db.Column(db.DateTime, default=datetime.utcnow) 
 
 class PortalCategory(db.Model):
     id = db.Column(db.String(50), primary_key=True)
@@ -127,18 +129,33 @@ def inject_global_data():
     total_count = counter.count if counter else 100
     mandi_prices = MandiPrice.query.order_by(MandiPrice.last_updated.desc()).all()
     suggestions = VillageSuggestion.query.order_by(VillageSuggestion.date_submitted.desc()).all()
-    return dict(visitor_count=total_count, mandi_prices=mandi_prices, suggestions=suggestions)
+
+    def image_url(filename):
+        if not filename:
+            return url_for('static', filename='images/hero_village_1788245846872.png')
+        if filename.startswith('http://') or filename.startswith('https://'):
+            return filename
+        uploads_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        if os.path.exists(uploads_path):
+            return url_for('static', filename=f'uploads/{filename}')
+        images_path = os.path.join(app.root_path, 'static', 'images', filename)
+        if os.path.exists(images_path):
+            return url_for('static', filename=f'images/{filename}')
+        return url_for('static', filename=f'uploads/{filename}')
+
+    return dict(visitor_count=total_count, mandi_prices=mandi_prices, suggestions=suggestions, image_url=image_url)
 
 # --- Routes ---
 
 @app.route('/')
 def index():
     events = Event.query.all()
-    slideshow_images = Image.query.filter_by(category='slideshow').all()
+    slideshow_images = Image.query.filter_by(category='slideshow').order_by(Image.id.asc()).all()
+    gallery_images = Image.query.filter_by(category='gallery').order_by(Image.id.asc()).all()
     site_content_list = SiteContent.query.all()
     # Convert list to dict for easy access in template
     site_content = {sc.id: sc for sc in site_content_list}
-    return render_template('index.html', events=events, slideshow_images=slideshow_images, site_content=site_content)
+    return render_template('index.html', events=events, slideshow_images=slideshow_images, gallery_images=gallery_images, site_content=site_content)
 
 @app.route('/history')
 def history():
@@ -176,7 +193,9 @@ def contact():
 def portal():
     # Fetch all categories and images
     categories = PortalCategory.query.all()
-    images = Image.query.all()
+    images = Image.query.order_by(Image.id.desc()).all()
+    slideshow_images = Image.query.filter_by(category='slideshow').order_by(Image.id.desc()).all()
+    gallery_images = Image.query.filter_by(category='gallery').order_by(Image.id.desc()).all()
     events = Event.query.all()
     portal_events = PortalEvent.query.all()
     messages = Message.query.order_by(Message.date_sent.desc()).all()
@@ -207,7 +226,7 @@ def portal():
             'icon': icon
         })
         
-    return render_template('portal.html', categories=categories, category_data=category_data, images=images, events=events, portal_events=portal_events, messages=messages, announcements=all_announcements, site_content=site_content, map_locations=map_locations)
+    return render_template('portal.html', categories=categories, category_data=category_data, images=images, slideshow_images=slideshow_images, gallery_images=gallery_images, events=events, portal_events=portal_events, messages=messages, announcements=all_announcements, site_content=site_content, map_locations=map_locations)
 
 @app.route('/portal/<category_id>')
 def portal_category_detail(category_id):
@@ -434,44 +453,92 @@ def allowed_file(filename):
 @login_required
 def upload_image():
     if 'image' not in request.files:
-        flash('No file part', 'error')
-        return redirect(url_for('portal'))
+        flash('No file part selected.', 'error')
+        return redirect(request.referrer or url_for('portal'))
     
     file = request.files['image']
-    category = request.form.get('category')
+    category = request.form.get('category', 'slideshow')
+    title = request.form.get('title', '').strip()
     
     if file.filename == '':
-        flash('No selected file', 'error')
-        return redirect(url_for('portal'))
+        flash('No file selected.', 'error')
+        return redirect(request.referrer or url_for('portal'))
         
     if file and allowed_file(file.filename):
         ext = file.filename.rsplit('.', 1)[1].lower()
-        unique_filename = f"{uuid.uuid4().hex}.{ext}"
+        unique_filename = f"{category}_{uuid.uuid4().hex[:12]}.{ext}"
         filepath = os.path.join(app.config['UPLOAD_FOLDER'], unique_filename)
         
         file.save(filepath)
         
-        new_image = Image(filename=unique_filename, category=category)
+        new_image = Image(filename=unique_filename, category=category, title=title if title else None)
         db.session.add(new_image)
         db.session.commit()
         
-        flash('Image uploaded successfully!', 'success')
+        flash(f'Image added to {category} successfully! It is stored permanently until deleted.', 'success')
     else:
-        flash('Invalid file type. Only images allowed.', 'error')
+        flash('Invalid file type. Only PNG, JPG, JPEG, GIF images are allowed.', 'error')
         
-    return redirect(url_for('portal') + f'#{category}')
+    return redirect(request.referrer or (url_for('portal') + f'#{category}'))
+
+@app.route('/edit_image/<int:image_id>', methods=['POST'])
+@login_required
+def edit_image(image_id):
+    image = Image.query.get_or_404(image_id)
+    new_title = request.form.get('title')
+    new_category = request.form.get('category')
+    new_file = request.files.get('image')
+
+    if new_title is not None:
+        image.title = new_title.strip() if new_title.strip() else None
+    if new_category:
+        image.category = new_category.strip()
+        
+    if new_file and new_file.filename != '' and allowed_file(new_file.filename):
+        ext = new_file.filename.rsplit('.', 1)[1].lower()
+        unique_filename = f"{image.category}_{uuid.uuid4().hex[:12]}.{ext}"
+        new_filepath = os.path.join(app.config['UPLOAD_FOLDER'], unique_filename)
+        new_file.save(new_filepath)
+        
+        # Safely remove old uploaded file if not a protected system image
+        system_protected = {
+            'hero_village_1788245846872.png',
+            'village_temple_1788245881477.png',
+            'village_culture_1788245901170.png'
+        }
+        old_filepath = os.path.join(app.config['UPLOAD_FOLDER'], image.filename)
+        if os.path.exists(old_filepath) and image.filename not in system_protected:
+            try:
+                os.remove(old_filepath)
+            except OSError:
+                pass
+                
+        image.filename = unique_filename
+        
+    db.session.commit()
+    flash('Image updated successfully! Changes are permanently saved.', 'success')
+    return redirect(request.referrer or (url_for('portal') + f'#{image.category}'))
 
 @app.route('/delete_image/<int:image_id>', methods=['POST'])
 @login_required
 def delete_image(image_id):
     image = Image.query.get_or_404(image_id)
+    system_protected = {
+        'hero_village_1788245846872.png',
+        'village_temple_1788245881477.png',
+        'village_culture_1788245901170.png'
+    }
     filepath = os.path.join(app.config['UPLOAD_FOLDER'], image.filename)
-    if os.path.exists(filepath):
-        os.remove(filepath)
+    if os.path.exists(filepath) and image.filename not in system_protected:
+        try:
+            os.remove(filepath)
+        except OSError:
+            pass
+            
     db.session.delete(image)
     db.session.commit()
-    flash('Image deleted successfully.', 'success')
-    return redirect(url_for('portal') + f'#{image.category}')
+    flash('Image permanently deleted.', 'success')
+    return redirect(request.referrer or (url_for('portal') + f'#{image.category}'))
 
 @app.route('/edit_site_content/<content_id>', methods=['POST'])
 @login_required
@@ -658,6 +725,50 @@ def init_db():
             ]
             for tag_val, desc_val in default_events:
                 db.session.add(Event(tag=tag_val, description=desc_val))
+
+        # Ensure image table has title and date_uploaded columns
+        try:
+            conn = db.engine.raw_connection()
+            cursor = conn.cursor()
+            cursor.execute("PRAGMA table_info(image)")
+            columns = [info[1] for info in cursor.fetchall()]
+            if 'title' not in columns:
+                cursor.execute("ALTER TABLE image ADD COLUMN title VARCHAR(200)")
+            if 'date_uploaded' not in columns:
+                cursor.execute("ALTER TABLE image ADD COLUMN date_uploaded DATETIME")
+            conn.commit()
+            cursor.close()
+            conn.close()
+        except Exception as e:
+            print("Image schema update notice:", e)
+
+        # Seed default Slideshow images if empty
+        if not Image.query.filter_by(category='slideshow').first():
+            default_slides = [
+                ('hero_village_1788245846872.png', 'slideshow', 'Serene Dawn over Sankhei Landscape'),
+                ('village_temple_1788245881477.png', 'slideshow', 'Ancient Echoes of Baba Kapileswar Shiv Temple'),
+                ('village_culture_1788245901170.png', 'slideshow', 'Joyous Celebrations & Vibrant Odia Culture')
+            ]
+            for fname, cat, title in default_slides:
+                db.session.add(Image(filename=fname, category=cat, title=title))
+
+        # Seed default Gallery images if empty
+        if not Image.query.filter_by(category='gallery').first():
+            default_gallery = [
+                ('hero_village_1788245846872.png', 'gallery', 'Serene Dawn'),
+                ('village_temple_1788245881477.png', 'gallery', 'Ancient Echoes'),
+                ('village_culture_1788245901170.png', 'gallery', 'Joyous Celebrations')
+            ]
+            for fname, cat, title in default_gallery:
+                db.session.add(Image(filename=fname, category=cat, title=title))
+
+        # Ensure default seed images exist in uploads folder as well
+        import shutil
+        for img_name in ['hero_village_1788245846872.png', 'village_temple_1788245881477.png', 'village_culture_1788245901170.png']:
+            src = os.path.join(app.root_path, 'static', 'images', img_name)
+            dst = os.path.join(app.config['UPLOAD_FOLDER'], img_name)
+            if os.path.exists(src) and not os.path.exists(dst):
+                shutil.copy(src, dst)
 
         # Clean up any lingering <br> or &lt;br&gt; tags in SiteContent
         about_item = SiteContent.query.get('home_about')

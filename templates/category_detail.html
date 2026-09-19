@@ -93,7 +93,7 @@
                 </div>
             </div>
             {% if category.profile_image %}
-            <img src="{{ url_for('static', filename='uploads/' + category.profile_image) }}" alt="{{ category.title }}" style="width: 110px; height: 110px; object-fit: cover; border-radius: 50%; border: 4px solid var(--accent); margin-left: auto; box-shadow: 0 8px 25px rgba(0,0,0,0.4);" class="lightbox-trigger" data-caption="{{ category.title }} Official Header">
+            <img src="{{ image_url(category.profile_image) }}" alt="{{ category.title }}" style="width: 110px; height: 110px; object-fit: cover; border-radius: 50%; border: 4px solid var(--accent); margin-left: auto; box-shadow: 0 8px 25px rgba(0,0,0,0.4);" class="lightbox-trigger" data-caption="{{ category.title }} Official Header">
             {% endif %}
         </div>
         <p class="sub-page-desc">{{ category.description }}</p>
@@ -135,12 +135,20 @@
 
             <div class="image-grid">
                 {% for img in images %}
-                <div class="image-card lightbox-trigger" data-caption="{{ category.title }} Gallery Image">
-                    <img src="{{ url_for('static', filename='uploads/' + img.filename) }}" alt="{{ category.title }} Image">
+                <div class="image-card" style="position: relative; overflow: hidden; border-radius: 12px; height: 180px;">
+                    <img src="{{ image_url(img.filename) }}" alt="{{ img.title or category.title }}" class="lightbox-trigger" data-caption="{{ img.title or category.title }} Gallery Image" style="cursor: pointer; width: 100%; height: 100%; object-fit: cover;">
+                    {% if img.title %}
+                    <div style="position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.65); color: #fff; padding: 0.3rem 0.6rem; font-size: 0.78rem; text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">
+                        {{ img.title }}
+                    </div>
+                    {% endif %}
                     {% if current_user.is_authenticated %}
-                    <form action="{{ url_for('delete_image', image_id=img.id) }}" method="POST" style="margin:0;" onsubmit="return confirm('Delete image?');">
-                        <button type="submit" class="delete-btn" title="Remove">&times;</button>
-                    </form>
+                    <div style="position: absolute; top: 0.35rem; right: 0.35rem; display: flex; gap: 0.3rem; z-index: 2;">
+                        <button type="button" onclick="openCatImgEdit('{{ img.id }}', '{{ img.title or '' }}')" style="background: var(--accent); color: white; border: none; width: 28px; height: 28px; border-radius: 50%; cursor: pointer; font-size: 0.8rem; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(0,0,0,0.3);" title="Edit caption or replace image">✏️</button>
+                        <form action="{{ url_for('delete_image', image_id=img.id) }}" method="POST" style="margin:0;" onsubmit="return confirm('Delete this image? It will NOT be removed unless you confirm.');">
+                            <button type="submit" class="delete-btn" title="Remove" style="position: static; width: 28px; height: 28px; font-size: 1.1rem; line-height: 1; box-shadow: 0 2px 6px rgba(0,0,0,0.3);">&times;</button>
+                        </form>
+                    </div>
                     {% endif %}
                 </div>
                 {% else %}
@@ -151,12 +159,31 @@
             </div>
 
             {% if current_user.is_authenticated %}
+            <!-- Modal / Edit Form for Category Image -->
+            <div id="cat-img-edit-modal" style="display: none; background: #fff; padding: 1.25rem; border-radius: 12px; margin-top: 1.5rem; border: 2px solid var(--accent); box-shadow: 0 6px 20px rgba(0,0,0,0.08);">
+                <h4 style="margin: 0 0 0.75rem; color: var(--primary);">✏️ Edit Photo Details</h4>
+                <form id="cat-img-edit-form" action="" method="POST" enctype="multipart/form-data" style="display: flex; flex-direction: column; gap: 0.6rem;">
+                    <input type="text" id="cat-img-edit-title" name="title" placeholder="Caption / Title" style="padding: 0.5rem; border: 1px solid #ccc; border-radius: 6px; font-size: 0.9rem;">
+                    <div>
+                        <label style="font-size: 0.8rem; color: #555;">Replace Photo (Optional):</label>
+                        <input type="file" name="image" accept="image/*" style="font-size: 0.85rem; margin-top: 0.2rem;">
+                    </div>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <button type="submit" class="cta-btn" style="padding: 0.45rem 1.2rem; border: none; font-size: 0.85rem; border-radius: 6px; cursor: pointer;">Save Changes</button>
+                        <button type="button" onclick="document.getElementById('cat-img-edit-modal').style.display='none'" style="padding: 0.45rem 1rem; background: #ddd; border: none; border-radius: 6px; cursor: pointer; font-size: 0.85rem;">Cancel</button>
+                    </div>
+                </form>
+            </div>
+
             <div style="background: rgba(44, 74, 59, 0.06); padding: 1.25rem; border-radius: 14px; margin-top: 1.5rem;">
                 <strong style="display: block; margin-bottom: 0.5rem; color: var(--primary);">Upload New Gallery Photo:</strong>
-                <form action="{{ url_for('upload_image') }}" method="POST" enctype="multipart/form-data" style="display: flex; gap: 0.5rem;">
+                <form action="{{ url_for('upload_image') }}" method="POST" enctype="multipart/form-data" style="display: flex; flex-direction: column; gap: 0.6rem;">
                     <input type="hidden" name="category" value="{{ category.id }}">
-                    <input type="file" name="image" accept="image/*" required style="flex-grow: 1;">
-                    <button type="submit" class="cta-btn" style="padding: 0.5rem 1.25rem; border: none; font-size: 0.9rem; cursor: pointer;">Upload</button>
+                    <input type="text" name="title" placeholder="Photo Caption / Title (Optional)" style="padding: 0.5rem 0.7rem; border: 1px solid #ccc; border-radius: 6px; font-size: 0.9rem;">
+                    <div style="display: flex; gap: 0.5rem; align-items: center;">
+                        <input type="file" name="image" accept="image/*" required style="flex-grow: 1;">
+                        <button type="submit" class="cta-btn" style="padding: 0.5rem 1.25rem; border: none; font-size: 0.9rem; cursor: pointer; white-space: nowrap;">Upload Photo</button>
+                    </div>
                 </form>
             </div>
             {% endif %}
@@ -265,4 +292,18 @@
     </div>
 
 </div>
+
+<script>
+    function openCatImgEdit(id, title) {
+        const modal = document.getElementById('cat-img-edit-modal');
+        const form = document.getElementById('cat-img-edit-form');
+        const titleInput = document.getElementById('cat-img-edit-title');
+        if (modal && form) {
+            form.action = '/edit_image/' + id;
+            if (titleInput) titleInput.value = title;
+            modal.style.display = 'block';
+            modal.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+    }
+</script>
 {% endblock %}

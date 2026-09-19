@@ -174,27 +174,240 @@
 
                     <!-- Slideshow Management -->
                     <div style="background: var(--bg-light); padding: 1.5rem; border-radius: 16px;">
-                        <h3 style="font-size: 1.25rem; margin-bottom: 1rem; color: var(--primary);">Manage Slideshow Banners</h3>
-                        <div class="image-grid" style="grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
-                            {% for img in images %}
-                                {% if img.category == 'slideshow' %}
-                                <div class="image-card" style="height: 100px;">
-                                    <img src="{{ url_for('static', filename='uploads/' + img.filename) }}" alt="Slideshow Image">
-                                    <form action="{{ url_for('delete_image', image_id=img.id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Delete this slideshow image?');">
-                                        <button type="submit" class="delete-btn" title="Remove Image">&times;</button>
-                                    </form>
-                                </div>
-                                {% endif %}
-                            {% endfor %}
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                            <h3 style="font-size: 1.25rem; color: var(--primary); margin: 0;">Manage Slideshow Banners</h3>
+                            <span style="background: var(--primary); color: white; padding: 0.2rem 0.6rem; border-radius: 20px; font-size: 0.8rem; font-weight: 600;">{{ slideshow_images|length }} Active</span>
                         </div>
 
-                        <strong>Upload New Slideshow Photo:</strong>
-                        <form action="{{ url_for('upload_image') }}" method="POST" enctype="multipart/form-data" style="display: flex; gap: 0.5rem; margin-top: 0.5rem;">
-                            <input type="hidden" name="category" value="slideshow">
-                            <input type="file" name="image" accept="image/*" required style="width: 100%;">
-                            <button type="submit" class="cta-btn" style="border: none; padding: 0.6rem 1.2rem; cursor: pointer; font-size: 0.9rem;">Upload</button>
-                        </form>
+                        <!-- Permanent Persistence Reassurance Banner -->
+                        <div style="background: rgba(44, 74, 59, 0.08); border-left: 3px solid var(--primary); padding: 0.6rem 0.85rem; border-radius: 8px; margin-bottom: 1rem; font-size: 0.84rem; color: var(--primary);">
+                            ℹ️ <strong>Permanent Storage:</strong> Any slideshow image you upload or update here stays active on the homepage slideshow until you choose to delete it.
+                        </div>
+
+                        <ul style="list-style: none; padding: 0; margin-bottom: 1.5rem; display: flex; flex-direction: column; gap: 0.75rem;">
+                            {% for img in slideshow_images %}
+                            <li style="background: #fff; border: 1px solid rgba(0,0,0,0.08); border-radius: 10px; padding: 0.85rem 1rem; box-shadow: 0 2px 5px rgba(0,0,0,0.03);">
+                                <div style="display: flex; gap: 1rem; align-items: center;">
+                                    <img src="{{ image_url(img.filename) }}" alt="Slideshow Thumbnail" style="width: 70px; height: 50px; object-fit: cover; border-radius: 6px; border: 1px solid #ddd; flex-shrink: 0;" class="lightbox-trigger" data-caption="{{ img.title or 'Slideshow Image' }}">
+                                    <div style="flex: 1; min-width: 0;">
+                                        <strong style="font-size: 0.95rem; color: var(--text-dark); display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                                            {{ img.title or 'No caption set' }}
+                                        </strong>
+                                        <small style="color: var(--text-muted); font-size: 0.78rem;">Category: Slideshow</small>
+                                    </div>
+                                    <div style="display: flex; gap: 0.4rem; flex-shrink: 0;">
+                                        <button type="button" onclick="toggleEditImage('{{ img.id }}')" style="background: var(--accent); color: white; border: none; padding: 0.35rem 0.65rem; border-radius: 6px; cursor: pointer; font-size: 0.8rem; display: flex; align-items: center; gap: 0.25rem;" title="Edit caption or replace image">✏️ Edit</button>
+                                        <form action="{{ url_for('delete_image', image_id=img.id) }}" method="POST" style="margin: 0;" onsubmit="return confirm('Are you sure you want to permanently delete this slideshow image? It will NOT be removed unless you confirm.');">
+                                            <button type="submit" style="background: #dc3545; color: white; border: none; padding: 0.35rem 0.65rem; border-radius: 6px; cursor: pointer; font-size: 0.8rem; display: flex; align-items: center; gap: 0.25rem;" title="Delete this image">🗑️ Delete</button>
+                                        </form>
+                                    </div>
+                                </div>
+
+                                <!-- Collapsible Edit Form for Slideshow Image -->
+                                <div id="edit-image-form-{{ img.id }}" style="display: none; margin-top: 0.85rem; padding-top: 0.85rem; border-top: 1px dashed #ddd;">
+                                    <form action="{{ url_for('edit_image', image_id=img.id) }}" method="POST" enctype="multipart/form-data" style="display: flex; flex-direction: column; gap: 0.6rem;">
+                                        <div style="display: flex; flex-direction: column; gap: 0.3rem;">
+                                            <label style="font-size: 0.8rem; font-weight: 600; color: #555;">Caption / Title:</label>
+                                            <input type="text" name="title" value="{{ img.title or '' }}" placeholder="Caption (e.g. Serene Dawn over Paddy Fields)" style="padding: 0.5rem 0.7rem; border: 1px solid #ccc; border-radius: 6px; font-size: 0.9rem;">
+                                        </div>
+                                        <div style="display: flex; flex-direction: column; gap: 0.3rem;">
+                                            <label style="font-size: 0.8rem; font-weight: 600; color: #555;">Replace Photo (Optional):</label>
+                                            <input type="file" name="image" accept="image/*" style="font-size: 0.85rem;">
+                                            <small style="color: var(--text-muted); font-size: 0.75rem;">Leave empty to keep current photo.</small>
+                                        </div>
+                                        <div style="display: flex; gap: 0.5rem; margin-top: 0.25rem;">
+                                            <button type="submit" class="cta-btn" style="border: none; padding: 0.45rem 1rem; cursor: pointer; font-size: 0.85rem; border-radius: 6px;">💾 Save Updates</button>
+                                            <button type="button" onclick="toggleEditImage('{{ img.id }}')" style="background: #6c757d; color: white; border: none; padding: 0.45rem 0.85rem; border-radius: 6px; cursor: pointer; font-size: 0.85rem;">Cancel</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </li>
+                            {% else %}
+                            <li style="color: var(--text-muted); background: #fff; padding: 1rem; border-radius: 8px; text-align: center;">No slideshow images uploaded yet.</li>
+                            {% endfor %}
+                        </ul>
+
+                        <div style="border-top: 1px solid rgba(0,0,0,0.1); padding-top: 1rem;">
+                            <strong style="display: block; margin-bottom: 0.5rem; color: var(--primary);">➕ Upload New Slideshow Banner:</strong>
+                            <form action="{{ url_for('upload_image') }}" method="POST" enctype="multipart/form-data" style="display: flex; flex-direction: column; gap: 0.6rem;">
+                                <input type="hidden" name="category" value="slideshow">
+                                <input type="text" name="title" placeholder="Banner Caption / Title (e.g. Danda Yatra Celebration)" style="padding: 0.6rem; border: 1px solid #ccc; border-radius: 8px; font-size: 0.9rem;">
+                                <input type="file" name="image" accept="image/*" required style="padding: 0.3rem 0; font-size: 0.9rem;">
+                                <button type="submit" class="cta-btn" style="border: none; padding: 0.6rem; cursor: pointer; font-size: 0.9rem;">Upload Slideshow Image</button>
+                            </form>
+                        </div>
                     </div>
+                </div>
+            </div>
+
+            <!-- Master Homepage Gallery & Sub-Portal Images Admin -->
+            <div class="admin-control-card" id="manage_images" style="border-left: 5px solid #6f42c1;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem; margin-bottom: 0.5rem;">
+                    <div>
+                        <h2 style="color: #6f42c1; font-size: 1.5rem; margin: 0;">🖼️ Website Photo Gallery Management</h2>
+                        <p style="margin: 0.3rem 0 0; color: var(--text-muted);">Manage photos for the Homepage "Glimpses of Sankhei" Gallery and all Sub-Portal Categories.</p>
+                    </div>
+                    <span style="background: #6f42c1; color: white; padding: 0.3rem 0.8rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600;">{{ images|length }} Total Photos</span>
+                </div>
+
+                <!-- Permanent Persistence Reassurance Banner -->
+                <div style="background: rgba(111, 66, 193, 0.08); border-left: 3px solid #6f42c1; padding: 0.65rem 0.9rem; border-radius: 8px; margin: 1rem 0 1.5rem; font-size: 0.85rem; color: #49288f;">
+                    ℹ️ <strong>Permanent Image Storage Guaranteed:</strong> Every photo you upload here is saved permanently in the database and server storage. It will stay live on the website until you choose to delete it.
+                </div>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 2rem;">
+                    
+                    <!-- Left: Homepage Gallery ("Glimpses of Sankhei") -->
+                    <div style="background: var(--bg-light); padding: 1.5rem; border-radius: 16px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                            <h3 style="font-size: 1.25rem; color: var(--primary); margin: 0;">Homepage Photo Gallery</h3>
+                            <span style="background: var(--accent); color: white; padding: 0.2rem 0.6rem; border-radius: 20px; font-size: 0.8rem; font-weight: 600;">{{ gallery_images|length }} Live</span>
+                        </div>
+                        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">These photos appear in the "Glimpses of Sankhei" glassmorphism gallery on the homepage.</p>
+
+                        <ul style="list-style: none; padding: 0; margin-bottom: 1.5rem; display: flex; flex-direction: column; gap: 0.75rem;">
+                            {% for gimg in gallery_images %}
+                            <li style="background: #fff; border: 1px solid rgba(0,0,0,0.08); border-radius: 10px; padding: 0.85rem 1rem; box-shadow: 0 2px 5px rgba(0,0,0,0.03);">
+                                <div style="display: flex; gap: 1rem; align-items: center;">
+                                    <img src="{{ image_url(gimg.filename) }}" alt="Gallery Thumbnail" style="width: 70px; height: 50px; object-fit: cover; border-radius: 6px; border: 1px solid #ddd; flex-shrink: 0;" class="lightbox-trigger" data-caption="{{ gimg.title or 'Gallery Photo' }}">
+                                    <div style="flex: 1; min-width: 0;">
+                                        <strong style="font-size: 0.95rem; color: var(--text-dark); display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                                            {{ gimg.title or 'No title set' }}
+                                        </strong>
+                                        <small style="color: var(--text-muted); font-size: 0.78rem;">Section: Homepage Gallery</small>
+                                    </div>
+                                    <div style="display: flex; gap: 0.4rem; flex-shrink: 0;">
+                                        <button type="button" onclick="toggleEditImage('{{ gimg.id }}')" style="background: var(--accent); color: white; border: none; padding: 0.35rem 0.65rem; border-radius: 6px; cursor: pointer; font-size: 0.8rem; display: flex; align-items: center; gap: 0.25rem;" title="Edit caption or replace photo">✏️ Edit</button>
+                                        <form action="{{ url_for('delete_image', image_id=gimg.id) }}" method="POST" style="margin: 0;" onsubmit="return confirm('Delete this gallery photo? It will NOT be removed unless you confirm.');">
+                                            <button type="submit" style="background: #dc3545; color: white; border: none; padding: 0.35rem 0.65rem; border-radius: 6px; cursor: pointer; font-size: 0.8rem; display: flex; align-items: center; gap: 0.25rem;" title="Delete this photo">🗑️ Delete</button>
+                                        </form>
+                                    </div>
+                                </div>
+
+                                <!-- Collapsible Edit Form for Gallery Photo -->
+                                <div id="edit-image-form-{{ gimg.id }}" style="display: none; margin-top: 0.85rem; padding-top: 0.85rem; border-top: 1px dashed #ddd;">
+                                    <form action="{{ url_for('edit_image', image_id=gimg.id) }}" method="POST" enctype="multipart/form-data" style="display: flex; flex-direction: column; gap: 0.6rem;">
+                                        <div style="display: flex; flex-direction: column; gap: 0.3rem;">
+                                            <label style="font-size: 0.8rem; font-weight: 600; color: #555;">Title / Overlay Caption:</label>
+                                            <input type="text" name="title" value="{{ gimg.title or '' }}" placeholder="Caption (e.g. Ancient Echoes)" style="padding: 0.5rem 0.7rem; border: 1px solid #ccc; border-radius: 6px; font-size: 0.9rem;">
+                                        </div>
+                                        <div style="display: flex; flex-direction: column; gap: 0.3rem;">
+                                            <label style="font-size: 0.8rem; font-weight: 600; color: #555;">Replace Photo (Optional):</label>
+                                            <input type="file" name="image" accept="image/*" style="font-size: 0.85rem;">
+                                            <small style="color: var(--text-muted); font-size: 0.75rem;">Leave empty to keep current photo.</small>
+                                        </div>
+                                        <div style="display: flex; gap: 0.5rem; margin-top: 0.25rem;">
+                                            <button type="submit" class="cta-btn" style="border: none; padding: 0.45rem 1rem; cursor: pointer; font-size: 0.85rem; border-radius: 6px;">💾 Save Updates</button>
+                                            <button type="button" onclick="toggleEditImage('{{ gimg.id }}')" style="background: #6c757d; color: white; border: none; padding: 0.45rem 0.85rem; border-radius: 6px; cursor: pointer; font-size: 0.85rem;">Cancel</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </li>
+                            {% else %}
+                            <li style="color: var(--text-muted); background: #fff; padding: 1rem; border-radius: 8px; text-align: center;">No homepage gallery photos added yet.</li>
+                            {% endfor %}
+                        </ul>
+
+                        <div style="border-top: 1px solid rgba(0,0,0,0.1); padding-top: 1rem;">
+                            <strong style="display: block; margin-bottom: 0.5rem; color: var(--primary);">➕ Add New Homepage Gallery Photo:</strong>
+                            <form action="{{ url_for('upload_image') }}" method="POST" enctype="multipart/form-data" style="display: flex; flex-direction: column; gap: 0.6rem;">
+                                <input type="hidden" name="category" value="gallery">
+                                <input type="text" name="title" placeholder="Photo Caption / Overlay Text (e.g. Morning River View)" required style="padding: 0.6rem; border: 1px solid #ccc; border-radius: 8px; font-size: 0.9rem;">
+                                <input type="file" name="image" accept="image/*" required style="padding: 0.3rem 0; font-size: 0.9rem;">
+                                <button type="submit" class="cta-btn" style="border: none; padding: 0.6rem; cursor: pointer; font-size: 0.9rem;">Add to Homepage Gallery</button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Right: Sub-Portal Categories Photos -->
+                    <div style="background: var(--bg-light); padding: 1.5rem; border-radius: 16px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                            <h3 style="font-size: 1.25rem; color: var(--primary); margin: 0;">Sub-Portal Category Photos</h3>
+                        </div>
+                        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">View and manage gallery photos across all 7 community sub-portals.</p>
+
+                        <!-- Category Filter Pills -->
+                        <div style="display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 1rem;">
+                            <button type="button" class="portal-chip-btn cat-img-filter-btn active" id="filter-btn-all" onclick="filterPortalCategoryImages('all')">All</button>
+                            <button type="button" class="portal-chip-btn cat-img-filter-btn" id="filter-btn-school" onclick="filterPortalCategoryImages('school')">🏫 School</button>
+                            <button type="button" class="portal-chip-btn cat-img-filter-btn" id="filter-btn-medical" onclick="filterPortalCategoryImages('medical')">🏥 Medical</button>
+                            <button type="button" class="portal-chip-btn cat-img-filter-btn" id="filter-btn-sarapanch" onclick="filterPortalCategoryImages('sarapanch')">🏛️ Sarapanch</button>
+                            <button type="button" class="portal-chip-btn cat-img-filter-btn" id="filter-btn-president" onclick="filterPortalCategoryImages('president')">👑 President</button>
+                            <button type="button" class="portal-chip-btn cat-img-filter-btn" id="filter-btn-culture" onclick="filterPortalCategoryImages('culture')">🎭 Culture</button>
+                            <button type="button" class="portal-chip-btn cat-img-filter-btn" id="filter-btn-temples" onclick="filterPortalCategoryImages('temples')">🛕 Temples</button>
+                            <button type="button" class="portal-chip-btn cat-img-filter-btn" id="filter-btn-agriculture" onclick="filterPortalCategoryImages('agriculture')">🌾 Agriculture</button>
+                        </div>
+
+                        <!-- Category Images List -->
+                        <ul style="list-style: none; padding: 0; margin-bottom: 1.5rem; display: flex; flex-direction: column; gap: 0.75rem; max-height: 380px; overflow-y: auto; padding-right: 0.3rem;">
+                            {% set cat_photos = images|selectattr('category', 'ne', 'slideshow')|selectattr('category', 'ne', 'gallery')|list %}
+                            {% for cimg in cat_photos %}
+                            <li class="cat-img-item" data-cat="{{ cimg.category }}" style="background: #fff; border: 1px solid rgba(0,0,0,0.08); border-radius: 10px; padding: 0.85rem 1rem; box-shadow: 0 2px 5px rgba(0,0,0,0.03);">
+                                <div style="display: flex; gap: 1rem; align-items: center;">
+                                    <img src="{{ image_url(cimg.filename) }}" alt="{{ cimg.category }}" style="width: 70px; height: 50px; object-fit: cover; border-radius: 6px; border: 1px solid #ddd; flex-shrink: 0;" class="lightbox-trigger" data-caption="{{ cimg.title or cimg.category }}">
+                                    <div style="flex: 1; min-width: 0;">
+                                        <strong style="font-size: 0.95rem; color: var(--text-dark); display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                                            {{ cimg.title or 'Category Photo' }}
+                                        </strong>
+                                        <span style="background: rgba(44, 74, 59, 0.1); color: var(--primary); padding: 0.15rem 0.5rem; border-radius: 4px; font-weight: 700; font-size: 0.72rem; text-transform: uppercase;">{{ cimg.category }}</span>
+                                    </div>
+                                    <div style="display: flex; gap: 0.4rem; flex-shrink: 0;">
+                                        <button type="button" onclick="toggleEditImage('{{ cimg.id }}')" style="background: var(--accent); color: white; border: none; padding: 0.35rem 0.65rem; border-radius: 6px; cursor: pointer; font-size: 0.8rem; display: flex; align-items: center; gap: 0.25rem;" title="Edit caption or replace photo">✏️ Edit</button>
+                                        <form action="{{ url_for('delete_image', image_id=cimg.id) }}" method="POST" style="margin: 0;" onsubmit="return confirm('Delete this photo? It will NOT be removed unless you confirm.');">
+                                            <button type="submit" style="background: #dc3545; color: white; border: none; padding: 0.35rem 0.65rem; border-radius: 6px; cursor: pointer; font-size: 0.8rem; display: flex; align-items: center; gap: 0.25rem;" title="Delete this photo">🗑️ Delete</button>
+                                        </form>
+                                    </div>
+                                </div>
+
+                                <!-- Collapsible Edit Form for Category Photo -->
+                                <div id="edit-image-form-{{ cimg.id }}" style="display: none; margin-top: 0.85rem; padding-top: 0.85rem; border-top: 1px dashed #ddd;">
+                                    <form action="{{ url_for('edit_image', image_id=cimg.id) }}" method="POST" enctype="multipart/form-data" style="display: flex; flex-direction: column; gap: 0.6rem;">
+                                        <div style="display: flex; flex-direction: column; gap: 0.3rem;">
+                                            <label style="font-size: 0.8rem; font-weight: 600; color: #555;">Caption / Title:</label>
+                                            <input type="text" name="title" value="{{ cimg.title or '' }}" placeholder="Photo Title" style="padding: 0.5rem 0.7rem; border: 1px solid #ccc; border-radius: 6px; font-size: 0.9rem;">
+                                        </div>
+                                        <div style="display: flex; flex-direction: column; gap: 0.3rem;">
+                                            <label style="font-size: 0.8rem; font-weight: 600; color: #555;">Change Category (Optional):</label>
+                                            <select name="category" style="padding: 0.5rem 0.7rem; border: 1px solid #ccc; border-radius: 6px; font-size: 0.9rem;">
+                                                {% for cat in categories %}
+                                                <option value="{{ cat.id }}" {% if cat.id == cimg.category %}selected{% endif %}>{{ cat.title }}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                        <div style="display: flex; flex-direction: column; gap: 0.3rem;">
+                                            <label style="font-size: 0.8rem; font-weight: 600; color: #555;">Replace Photo (Optional):</label>
+                                            <input type="file" name="image" accept="image/*" style="font-size: 0.85rem;">
+                                            <small style="color: var(--text-muted); font-size: 0.75rem;">Leave empty to keep current photo.</small>
+                                        </div>
+                                        <div style="display: flex; gap: 0.5rem; margin-top: 0.25rem;">
+                                            <button type="submit" class="cta-btn" style="border: none; padding: 0.45rem 1rem; cursor: pointer; font-size: 0.85rem; border-radius: 6px;">💾 Save Updates</button>
+                                            <button type="button" onclick="toggleEditImage('{{ cimg.id }}')" style="background: #6c757d; color: white; border: none; padding: 0.45rem 0.85rem; border-radius: 6px; cursor: pointer; font-size: 0.85rem;">Cancel</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </li>
+                            {% else %}
+                            <li style="color: var(--text-muted); background: #fff; padding: 1rem; border-radius: 8px; text-align: center;">No sub-portal category photos uploaded yet.</li>
+                            {% endfor %}
+                        </ul>
+
+                        <div style="border-top: 1px solid rgba(0,0,0,0.1); padding-top: 1rem;">
+                            <strong style="display: block; margin-bottom: 0.5rem; color: var(--primary);">➕ Upload Photo to Any Category:</strong>
+                            <form action="{{ url_for('upload_image') }}" method="POST" enctype="multipart/form-data" style="display: flex; flex-direction: column; gap: 0.6rem;">
+                                <div style="display: flex; gap: 0.5rem;">
+                                    <select name="category" required style="flex: 1; padding: 0.6rem; border: 1px solid #ccc; border-radius: 8px; font-size: 0.9rem;">
+                                        {% for cat in categories %}
+                                        <option value="{{ cat.id }}">{{ cat.title }} Portal</option>
+                                        {% endfor %}
+                                    </select>
+                                    <input type="text" name="title" placeholder="Caption (Optional)" style="flex: 2; padding: 0.6rem; border: 1px solid #ccc; border-radius: 8px; font-size: 0.9rem;">
+                                </div>
+                                <input type="file" name="image" accept="image/*" required style="padding: 0.3rem 0; font-size: 0.9rem;">
+                                <button type="submit" class="cta-btn" style="border: none; padding: 0.6rem; cursor: pointer; font-size: 0.9rem;">Upload Photo</button>
+                            </form>
+                        </div>
+                    </div>
+
                 </div>
             </div>
 
@@ -325,6 +538,26 @@
         if (el) {
             el.style.display = (el.style.display === 'none' || el.style.display === '') ? 'block' : 'none';
         }
+    }
+
+    function toggleEditImage(id) {
+        const el = document.getElementById('edit-image-form-' + id);
+        if (el) {
+            el.style.display = (el.style.display === 'none' || el.style.display === '') ? 'block' : 'none';
+        }
+    }
+
+    function filterPortalCategoryImages(cat) {
+        document.querySelectorAll('.cat-img-filter-btn').forEach(b => b.classList.remove('active'));
+        const btn = document.getElementById('filter-btn-' + cat);
+        if (btn) btn.classList.add('active');
+        document.querySelectorAll('.cat-img-item').forEach(item => {
+            if (cat === 'all' || item.getAttribute('data-cat') === cat) {
+                item.style.display = 'block';
+            } else {
+                item.style.display = 'none';
+            }
+        });
     }
 </script>
 {% endblock %}
